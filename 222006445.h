@@ -6,7 +6,9 @@
 
 int i = 0;
 int isCpfValid, isInputValid = 0;
+int isElementPresentInGroup = 0;
 char reset[] = {"-------------Reinicie a Aplicação ------------"};
+char locationsRows[10];
 
 typedef struct {
     char Cpf[16];
@@ -18,6 +20,14 @@ typedef struct {
     char City[40];
     char Uf[3];
 } Person;
+
+typedef struct
+{
+    char Uf[3];
+    char Name[120];
+    
+} Locations;
+
 
 void showMenu() {
     int opt;
@@ -96,22 +106,43 @@ int validateCpf(char cpf[])
 }
 
 
-int checkIfInputIsValid(char input[], int maxChar){
-    
+int checkIfInputIsValid(char input[], int maxChar){  
     // strlen(input <= maxChar) ? (continue) : (return 0);
+    int inputLen = strlen(input);
 
     // Checks if maximum length is attendend
-    if (!(strlen(input) < maxChar) || (strlen(input) == 0))
+    if (!(inputLen < maxChar) || (inputLen == 0))
     {
         printf("Voce ultrapassou o limite de caracteres para esse campo!\n %s", reset);
         exit(0);
     }
 
+    // Check if input is among of expectedInputs of a especified field
+    // if (expectedInputs != 0)
+    // {
+    //     int expectedInputsLen = strlen(expectedInputs);
+    //     for (int i = 0; i < expectedInputsLen; i++) {
+    //         if (, input) != NULL) {
+    //             printf("%s is present in expected inputs", input);
+    //             isElementPresentInGroup = 1;
+    //         }
+    //     }
+
+    //     if (isElementPresentInGroup != 1)
+    //     {
+    //         printf("Informacao digitada nao compativel com a esperada!\n, %s", reset);
+    //         exit(0);
+    //     }
+
+    //     isElementPresentInGroup = 0;
+    // }
+
+
     // issspace - check if it is a blank space
-    for (int i=0; i < strlen(input); i++) {
-        if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] == ' '))
+    for (int i=0; i < inputLen; i++) {
+        if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] >= 'a' && input[i] <= 'z' || input[i] == ' '))
         {
-            printf("Os inputs devem ser todos em caixa alta contendo apenas letras!\n %s", reset);
+            printf("Os inputs conter apenas letras ou espaços!\n %s", reset);
             exit(0);
         }
     }
@@ -124,20 +155,25 @@ void registerPerson(){
     fflush(stdin);
 
     printf("-------------------- REGISTRO DE PESSOA --------------------\n");
-    printf("Digite o CPF da pessoa: ");
+    printf("CPF: ");
     fgets(pw.Cpf, 15, stdin);
     pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
     validateCpf(pw.Cpf);
 
-    printf("Digite o nome da pessoa: ");
+    printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
     checkIfInputIsValid(pw.Name, sizeof(pw.Name));
 
-    printf("Digite o Sexo da pessoa: ");
+    printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
+    if (!pw.Sex == "F" ||pw.Sex == 'M'){
+        printf("O sexo digitado deve ser F ou M\n %s", reset);
+        exit(0);
+    }
+    
     checkIfInputIsValid(pw.Sex, sizeof(pw.Sex));
 
-    // //FUNCTION TO VALIDATE DATAAA!!!!!
+    //FUNCTION TO VALIDATE DATAAA!!!!!
     printf("Dia Nascimento: ");
     scanf("%d", &pw.DayBorn);
 
@@ -148,12 +184,12 @@ void registerPerson(){
     scanf("%d", &pw.yearBorn);
     fflush(stdin);
 
-    printf("Digite a cidade da pessoa: ");
+    printf("Cidade: ");
     fgets(pw.City, sizeof(pw.City), stdin);
     pw.City[strcspn(pw.City, "\n")] = '\0';
     checkIfInputIsValid(pw.City, sizeof(pw.City));
 
-    printf("Digite a UF/Estado da pessoa: ");
+    printf("UF/Estado: ");
     // verificar se a UF digitada tem somente 2 digitos?
     scanf("%s", pw.Uf);
     checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
