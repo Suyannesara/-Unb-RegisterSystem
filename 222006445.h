@@ -234,10 +234,10 @@ void registerPerson(){
 
     printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
-    // if (!(pw.Sex == 'F') || !(pw.Sex == 'M')){
-    //     printf("O sexo digitado deve ser F ou M\n %s", reset);
-    //     exit(0);
-    // }
+    if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0){
+        printf("O sexo digitado deve ser F ou M\n %s", reset);
+        exit(0);
+    }
     
     checkIfInputIsValid(pw.Sex, sizeof(pw.Sex));
 
