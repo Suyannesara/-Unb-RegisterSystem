@@ -6,14 +6,14 @@ int i = 0;
 int isCpfValid = 0;
 
 typedef struct {
-    char Cpf[15];
+    char Cpf[16];
     char Name[120];
-    char Sex[4];
+    char Sex[2];
     int MonthBorn;
     int DayBorn;
     int yearBorn;
     char City[40];
-    char Uf[4];
+    char Uf[3];
 } Person;
 
 void showMenu() {
@@ -45,43 +45,50 @@ void showMenu() {
 
 
 // VALIDATIONS
-
 int validateCpf(char cpf[])
 {
-    int i, j, digito1 = 0, digito2 = 0;
-    if(strlen(cpf) != 11)
-        return 0;
-    else if((strcmp(cpf,"00000000000") == 0) || (strcmp(cpf,"11111111111") == 0) || (strcmp(cpf,"22222222222") == 0) ||
-            (strcmp(cpf,"33333333333") == 0) || (strcmp(cpf,"44444444444") == 0) || (strcmp(cpf,"55555555555") == 0) ||
-            (strcmp(cpf,"66666666666") == 0) || (strcmp(cpf,"77777777777") == 0) || (strcmp(cpf,"88888888888") == 0) ||
-            (strcmp(cpf,"99999999999") == 0))
-        return 0; ///se o CPF tiver todos os números iguais ele é inválido.
-    else
+    int i, d1, d2, r;
+    int digits[11];
+
+    if (strlen(cpf) != 11)
     {
-        ///digito 1---------------------------------------------------
-        for(i = 0, j = 10; i < strlen(cpf)-2; i++, j--) ///multiplica os números de 10 a 2 e soma os resultados dentro de digito1
-            digito1 += (cpf[i]-48) * j;
-        digito1 %= 11;
-        if(digito1 < 2)
-            digito1 = 0;
-        else
-            digito1 = 11 - digito1;
-        if((cpf[9]-48) != digito1)
-            return 0; ///se o digito 1 não for o mesmo que o da validação CPF é inválido
-        else
-        ///digito 2--------------------------------------------------
-        {
-            for(i = 0, j = 11; i < strlen(cpf)-1; i++, j--) ///multiplica os números de 11 a 2 e soma os resultados dentro de digito2
-                    digito2 += (cpf[i]-48) * j;
-        digito2 %= 11;
-        if(digito2 < 2)
-            digito2 = 0;
-        else
-            digito2 = 11 - digito2;
-        if((cpf[10]-48) != digito2)
-            return 0; ///se o digito 2 não for o mesmo que o da validação CPF é inválido
+        printf("O cpf deve ter 11 digitos sem '.' ou '-'");
+        return 0;
+    }
+    
+    // Check for invalid caracthers and repeated digits
+    for (i = 0; i < 11; i++) {
+        if (!isdigit(cpf[i]) || (digits[i] = cpf[i] - '0') == digits[i+1]) {
+            return 0;
         }
     }
+
+    // Calculate first digit
+    d1 = 0;
+    for (i = 0; i < 9; i++) {
+        d1 += digits[i] * (10 - i);
+    }
+    r = 11 - (d1 % 11);
+    if (r == 10 || r == 11) {
+        r = 0;
+    }
+    if (r != digits[9]) {
+        return 0;
+    }
+
+    // Calculate second digit
+    d2 = 0;
+    for (i = 0; i < 10; i++) {
+        d2 += digits[i] * (11 - i);
+    }
+    r = 11 - (d2 % 11);
+    if (r == 10 || r == 11) {
+        r = 0;
+    }
+    if (r != digits[10]) {
+        return 0;
+    }
+
     return 1;
 }
 
@@ -92,42 +99,38 @@ void registerPerson(){
 
     printf("-------------------- REGISTRO DE PESSOA --------------------\n");
     printf("Digite o CPF da pessoa: ");
-    scanf("%s", pw.Cpf);
+    fgets(pw.Cpf, 15, stdin);
+    pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
 
     isCpfValid = validateCpf(pw.Cpf);
-    if(isCpfValid == 1){
+    if(isCpfValid == 0){
         printf("CPF inválido, favor reiniciar cadastro\n");
         return;
     }
-    
-    fflush(stdin);
 
     printf("Digite o nome da pessoa: ");
     scanf("%[^\n]s", pw.Name);
-    fflush(stdin);
 
     printf("Digite o Sexo da pessoa: ");
     scanf("%s", pw.Sex);
-    fflush(stdin);
 
     // //FUNCTION TO VALIDATE DATAAA!!!!!
     printf("Dia Nascimento: ");
     scanf("%d", &pw.DayBorn);
-    fflush(stdin);
 
     printf("Mês Nascimento: ");
     scanf("%d", &pw.MonthBorn);
-    fflush(stdin);
 
     printf("Ano Nascimento: ");
     scanf("%d", &pw.yearBorn);
     fflush(stdin);
 
     printf("Digite a cidade da pessoa: ");
-    scanf("%[^\n]s", pw.City);
-    fflush(stdin);
+    fgets(pw.City, sizeof(pw.City), stdin);
+    pw.City[strcspn(pw.City, "\n")] = '\0';
 
     printf("Digite a UF/Estado da pessoa: ");
+    // verificar se a UF digitada tem somente 2 digitos?
     scanf("%s", pw.Uf);
     fflush(stdin);
 
