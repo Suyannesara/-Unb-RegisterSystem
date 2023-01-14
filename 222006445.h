@@ -9,6 +9,7 @@ int isCpfValid, isInputValid = 0;
 int isElementPresentInGroup = 0;
 char reset[] = {"-------------Reinicie a Aplicação ------------"};
 char locationsRows[10];
+int ufExists;
 
 typedef struct {
     char Cpf[16];
@@ -27,6 +28,8 @@ typedef struct
     char Name[120];
     
 } Locations;
+
+Locations locations[1000];
 
 
 void showMenu() {
@@ -63,46 +66,72 @@ int validateCpf(char cpf[])
     int i, d1, d2, r;
     int digits[11];
 
+    // check if string is 11 characters long
     if (strlen(cpf) != 11)
     {
-        printf("O cpf deve ter 11 digitos sem '.' ou '-'\n %s", reset);
-        exit(0);
-    }
-    
-    // Check for invalid caracthers and repeated digits
-    for (i = 0; i < 11; i++) {
-        if (!isdigit(cpf[i]) || (digits[i] = cpf[i] - '0') == digits[i+1]) {
-            exit(0);
-        }
+        printf("Invalid CPF: Must be 11 digits long.\n");
+        return 0;
     }
 
-    // Calculate first digit
+    // check if string contains only digits
+    for (i = 0; i < 11; i++)
+    {
+        if (!isdigit(cpf[i]))
+        {
+            printf("Invalid CPF: Must contain only digits.\n");
+            return 0;
+        }
+        digits[i] = cpf[i] - '0';
+    }
+
+    // check for invalid CPF numbers according to the Ministry of Agriculture in Brazil
+    // check if all digits are the same
+    for (i = 1; i < 11; i++) {
+        if (digits[i] != digits[0]) {
+            break;
+        }
+    }
+    if (i == 11) {
+        printf("Invalid CPF: All digits are the same.\n");
+        return 0;
+    }
+
+    // calculate first verification digit
     d1 = 0;
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < 9; i++)
+    {
         d1 += digits[i] * (10 - i);
     }
     r = 11 - (d1 % 11);
-    if (r == 10 || r == 11) {
+    if (r == 10 || r == 11)
+    {
         r = 0;
     }
-    if (r != digits[9]) {
+    if (r != digits[9])
+    {
+        printf("Invalid CPF: Incorrect first verification digit.\n");
         return 0;
     }
 
-    // Calculate second digit
+    // calculate second verification digit
     d2 = 0;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++)
+    {
         d2 += digits[i] * (11 - i);
     }
     r = 11 - (d2 % 11);
-    if (r == 10 || r == 11) {
+    if (r == 10 || r == 11)
+    {
         r = 0;
     }
-    if (r != digits[10]) {
+    if (r != digits[10])
+    {
+        printf("Invalid CPF: Incorrect second verification digit.\n");
         return 0;
     }
 
-    // return 1;
+    printf("Valid CPF number!\n");
+    return 1;
 }
 
 
@@ -117,27 +146,6 @@ int checkIfInputIsValid(char input[], int maxChar){
         exit(0);
     }
 
-    // Check if input is among of expectedInputs of a especified field
-    // if (expectedInputs != 0)
-    // {
-    //     int expectedInputsLen = strlen(expectedInputs);
-    //     for (int i = 0; i < expectedInputsLen; i++) {
-    //         if (, input) != NULL) {
-    //             printf("%s is present in expected inputs", input);
-    //             isElementPresentInGroup = 1;
-    //         }
-    //     }
-
-    //     if (isElementPresentInGroup != 1)
-    //     {
-    //         printf("Informacao digitada nao compativel com a esperada!\n, %s", reset);
-    //         exit(0);
-    //     }
-
-    //     isElementPresentInGroup = 0;
-    // }
-
-
     // issspace - check if it is a blank space
     for (int i=0; i < inputLen; i++) {
         if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] >= 'a' && input[i] <= 'z' || input[i] == ' '))
@@ -150,6 +158,61 @@ int checkIfInputIsValid(char input[], int maxChar){
     return 1;
 }
 
+
+int checkIfLocationExists(char userInput[], int locationType){
+
+    int size = 0;
+    char line[5572];
+    char *ufToken;
+    char *cityTokenNoAccent;
+    char *cityToken;
+
+    FILE *fp2 = fopen("locations.csv", "r");
+    if (fp2 == NULL) {
+        printf("Error opening file\n");
+        exit(0);
+    }
+
+    if (locationType == 1)
+    {
+        size = 0;
+        // VERRIFY UF
+        while (fgets(line, sizeof(line), fp2)) {
+        ufToken = strtok(line, ",");
+        ufToken = strtok(NULL, ",");
+        // strcpy(locations[size].Uf, token);
+
+        // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
+        if(strcmp(userInput, ufToken) == 0){
+            return 1;
+        }
+        size++;
+        }
+    }
+       
+    if (locationType == 0)
+    {
+        // VERIFY CITY
+        while (fgets(line, sizeof(line), fp2)) {
+        cityToken = strtok(line, ","); // ignore the first column
+        cityToken = strtok(NULL, ","); // ignore the second column
+        cityToken = strtok(NULL, ",");
+        cityTokenNoAccent = strtok(NULL, ",");;
+
+        // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
+        if((strcmp(userInput, cityToken) == 0) || (strcmp(userInput, cityTokenNoAccent) == 0)){
+            return 1;
+        }
+        size++;
+        }
+    }
+    
+    // Close the file
+    fclose(fp2);
+
+    return 0;
+}
+
 void registerPerson(){
     Person pw;
     fflush(stdin);
@@ -158,7 +221,12 @@ void registerPerson(){
     printf("CPF: ");
     fgets(pw.Cpf, 15, stdin);
     pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
-    validateCpf(pw.Cpf);
+    isCpfValid = validateCpf(pw.Cpf);
+    if (isCpfValid == 0)
+    {
+        exit(0);
+    }
+    
 
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
@@ -187,12 +255,23 @@ void registerPerson(){
     printf("Cidade: ");
     fgets(pw.City, sizeof(pw.City), stdin);
     pw.City[strcspn(pw.City, "\n")] = '\0';
-    checkIfInputIsValid(pw.City, sizeof(pw.City));
+    // checkIfInputIsValid(pw.City, sizeof(pw.City));
+
+    if(checkIfLocationExists(pw.City, 0) == 0){
+        printf("Cidade inexistente\n %s", reset);
+        exit(0);
+    }
 
     printf("UF/Estado: ");
     // verificar se a UF digitada tem somente 2 digitos?
     scanf("%s", pw.Uf);
     checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
+
+    if(checkIfLocationExists(pw.Uf, 1) == 0){
+        printf("UF inexistente\n %s", reset);
+        exit(0);
+    }
+
     fflush(stdin);
 
     // FILE - Writing
