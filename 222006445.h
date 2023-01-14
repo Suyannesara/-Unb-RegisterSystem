@@ -59,7 +59,6 @@ void showMenu() {
     fflush(stdin);
 }
 
-
 // VALIDATIONS
 int validateCpf(char cpf[])
 {
@@ -194,16 +193,17 @@ int checkIfLocationExists(char userInput[], int locationType){
     {
         // VERIFY CITY
         while (fgets(line, sizeof(line), fp2)) {
-        cityToken = strtok(line, ","); // ignore the first column
-        cityToken = strtok(NULL, ","); // ignore the second column
-        cityToken = strtok(NULL, ",");
-        cityTokenNoAccent = strtok(NULL, ",");;
+            cityToken = strtok(line, ",");
+            cityToken = strtok(NULL, ",");
+            cityToken = strtok(NULL, ",");
+            cityTokenNoAccent = strtok(NULL, ",");
+            printf("%s", cityTokenNoAccent);
 
-        // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
-        if((strcmp(userInput, cityToken) == 0) || (strcmp(userInput, cityTokenNoAccent) == 0)){
-            return 1;
-        }
-        size++;
+            // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
+            if(strcmp(userInput, cityTokenNoAccent) == 0){
+                return 1;
+            }
+            size++;
         }
     }
     
@@ -234,10 +234,10 @@ void registerPerson(){
 
     printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
-    if (!pw.Sex == "F" ||pw.Sex == 'M'){
-        printf("O sexo digitado deve ser F ou M\n %s", reset);
-        exit(0);
-    }
+    // if (!(pw.Sex == 'F') || !(pw.Sex == 'M')){
+    //     printf("O sexo digitado deve ser F ou M\n %s", reset);
+    //     exit(0);
+    // }
     
     checkIfInputIsValid(pw.Sex, sizeof(pw.Sex));
 
@@ -255,7 +255,7 @@ void registerPerson(){
     printf("Cidade: ");
     fgets(pw.City, sizeof(pw.City), stdin);
     pw.City[strcspn(pw.City, "\n")] = '\0';
-    // checkIfInputIsValid(pw.City, sizeof(pw.City));
+    checkIfInputIsValid(pw.City, sizeof(pw.City));
 
     if(checkIfLocationExists(pw.City, 0) == 0){
         printf("Cidade inexistente\n %s", reset);
