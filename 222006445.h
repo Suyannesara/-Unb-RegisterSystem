@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
+// #include <ctype.h>
 
 int i = 0;
-int isCpfValid = 0;
+int isCpfValid, isInputValid = 0;
+char reset[] = {"-------------Reinicie a Aplicação ------------"};
 
 typedef struct {
     char Cpf[16];
@@ -52,14 +55,14 @@ int validateCpf(char cpf[])
 
     if (strlen(cpf) != 11)
     {
-        printf("O cpf deve ter 11 digitos sem '.' ou '-'");
-        return 0;
+        printf("O cpf deve ter 11 digitos sem '.' ou '-'\n %s", reset);
+        exit(0);
     }
     
     // Check for invalid caracthers and repeated digits
     for (i = 0; i < 11; i++) {
         if (!isdigit(cpf[i]) || (digits[i] = cpf[i] - '0') == digits[i+1]) {
-            return 0;
+            exit(0);
         }
     }
 
@@ -89,9 +92,32 @@ int validateCpf(char cpf[])
         return 0;
     }
 
-    return 1;
+    // return 1;
 }
 
+
+int checkIfInputIsValid(char input[], int maxChar){
+    
+    // strlen(input <= maxChar) ? (continue) : (return 0);
+
+    // Checks if maximum length is attendend
+    if (!(strlen(input) < maxChar) || (strlen(input) == 0))
+    {
+        printf("Voce ultrapassou o limite de caracteres para esse campo!\n %s", reset);
+        exit(0);
+    }
+
+    // issspace - check if it is a blank space
+    for (int i=0; i < strlen(input); i++) {
+        if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] == ' '))
+        {
+            printf("Os inputs devem ser todos em caixa alta contendo apenas letras!\n %s", reset);
+            exit(0);
+        }
+    }
+
+    return 1;
+}
 
 void registerPerson(){
     Person pw;
@@ -101,18 +127,15 @@ void registerPerson(){
     printf("Digite o CPF da pessoa: ");
     fgets(pw.Cpf, 15, stdin);
     pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
-
-    isCpfValid = validateCpf(pw.Cpf);
-    if(isCpfValid == 0){
-        printf("CPF inválido, favor reiniciar cadastro\n");
-        return;
-    }
+    validateCpf(pw.Cpf);
 
     printf("Digite o nome da pessoa: ");
     scanf("%[^\n]s", pw.Name);
+    checkIfInputIsValid(pw.Name, sizeof(pw.Name));
 
     printf("Digite o Sexo da pessoa: ");
     scanf("%s", pw.Sex);
+    checkIfInputIsValid(pw.Sex, sizeof(pw.Sex));
 
     // //FUNCTION TO VALIDATE DATAAA!!!!!
     printf("Dia Nascimento: ");
@@ -128,10 +151,12 @@ void registerPerson(){
     printf("Digite a cidade da pessoa: ");
     fgets(pw.City, sizeof(pw.City), stdin);
     pw.City[strcspn(pw.City, "\n")] = '\0';
+    checkIfInputIsValid(pw.City, sizeof(pw.City));
 
     printf("Digite a UF/Estado da pessoa: ");
     // verificar se a UF digitada tem somente 2 digitos?
     scanf("%s", pw.Uf);
+    checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
     fflush(stdin);
 
     // FILE - Writing
@@ -149,7 +174,7 @@ void registerPerson(){
     fprintf(fp, "%s\n", pw.Cpf);
     fprintf(fp, "%s\n", pw.Name);
     fprintf(fp, "%s\n", pw.Sex);
-    fprintf(fp, "%d%d%d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
+    fprintf(fp, "%d/%d/%d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
     fprintf(fp, "%s\n", pw.City);
     fprintf(fp, "%s\n", pw.Uf);
     printf("Pessoa cadastrada com sucesso! \n");
