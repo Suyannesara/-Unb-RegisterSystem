@@ -186,7 +186,6 @@ int checkIfLocationExists(char userInput[], int locationType){
             cityTokenNoAccent = strtok(NULL, ",");
             cityTokenNoAccent = strtok(NULL, ",");
             cityTokenNoAccent = strtok(NULL, ",");
-            printf("%s", cityTokenNoAccent);
 
             // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
             if(strcmp(userInput, cityTokenNoAccent) == 0){
@@ -289,11 +288,11 @@ void consultPerson(){
     FILE *readFile = fopen("person.txt", "r");
     Person pr = {0};
     char cpf[16];
-
+    char buffer[1000];
     printf("-------------------- CONSULTA DE PESSOA --------------------\n");
     printf("Digite o CPF para consulta: ");
     fflush(stdin);
-    fgets(cpf, 15, stdin);
+    fgets(cpf, 12, stdin);
     cpf[strcspn(cpf, "\n")] = '\0';
 
     if (readFile == NULL)
@@ -302,32 +301,40 @@ void consultPerson(){
         exit(0);
     }
 
-    while (fscanf(readFile, "%s", pr.Cpf) != EOF) {
-        fscanf(readFile, "%s", pr.Name);
-        fscanf(readFile, "%s", pr.Sex);
-        // fscanf(readFile, "%d/%d/%d", &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn);
-        printf("COMING HERE");
-        fscanf(readFile, "%s", pr.City);
-        fscanf(readFile, "%s", pr.Uf);
+    while(fgets(buffer,900,readFile) != NULL){
+        printf(pr.Cpf);
+        buffer[strcspn(buffer, "\n")] = 0;
+        sscanf(buffer, "%s", pr.Cpf);
+        fgets(buffer, sizeof buffer, readFile);
+        buffer[strcspn(buffer, "\n")] = 0;
+        sscanf(buffer, "%[^\n]s", pr.Name);
+        fgets(buffer, sizeof buffer, readFile);
+        buffer[strcspn(buffer, "\n")] = 0;
+        sscanf(buffer, "%s", pr.Sex);
+        fgets(buffer, sizeof buffer, readFile);
+        buffer[strcspn(buffer, "\n")] = 0;
+        sscanf(buffer, "%d/%d/%d", &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn);
+        fgets(buffer, sizeof buffer, readFile);
+        buffer[strcspn(buffer, "\n")] = 0;
+        sscanf(buffer, "%[^\n]s", pr.City);
+        fgets(buffer, sizeof buffer, readFile);
+        buffer[strcspn(buffer, "\n")] = 0;
+        sscanf(buffer, "%s", pr.Uf);
 
-        printf("AND HERE!");
+       
         if (strcmp(pr.Cpf, cpf) == 0)
         {
-            printf("---- DADOS DE %s ----\n", pr.Name);
-            printf("---- CPF:     %s \n", pr.Cpf);
-            printf("---- SEXO:    %s \n", pr.Sex);
-            // printf("---- DT. NASCIMENTO:    %d/%d/%d\n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
-            printf("---- CIDADE:    %s \n", pr.City);
-            printf("---- ESTADO/UF    %s \n", pr.Uf);
+            printf("---- DADOS DE: %s ----\n", pr.Name);
+            printf("---- CPF:               %s \n", pr.Cpf);
+            printf("---- SEXO:              %s \n", pr.Sex);
+            printf("---- DT. NASCIMENTO:    %d/%d/%d \n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
+            printf("---- CIDADE:            %s \n", pr.City);
+            printf("---- ESTADO/UF          %s \n", pr.Uf);
             exit(0);
-        }else{
-            printf("NOT EQUAL");
         }
 
+        memset(buffer, 0, sizeof(buffer));
+        memset(pr.Cpf, '\0', sizeof(pr.Cpf));
     }
-        
-        
-    // }
-
     fclose(readFile);
 }
