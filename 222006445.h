@@ -1,15 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-// #include <ctype.h>
-
-int i = 0;
-int isCpfValid, isInputValid = 0;
-int isElementPresentInGroup = 0;
-char reset[] = {"-------------Reinicie a Aplicação ------------"};
-char locationsRows[10];
-int ufExists;
+// #include <time.h>
 
 typedef struct {
     char Cpf[16];
@@ -31,9 +23,19 @@ typedef struct
 
 Locations locations[1000];
 
+int i = 0;
+int isCpfValid, isInputValid = 0;
+int isElementPresentInGroup = 0;
+char RESET[] = {"-------------Reinicie a Aplicação ------------"};
+char locationsRows[10];
+int ufExists;
 
-void showMenu() {
-    int opt;
+// ERROR MESSAGES
+char ERRORFILE[] = {"⚠️Erro ao abrir a base de dados\n"};
+
+
+int executeMenu() {
+    int option;
     printf("Escolha uma das opcoes a seguir: \n");
     printf("1) Cadastrar Pessoa \n");
     printf("2) Consultar Pessoa \n");
@@ -42,21 +44,8 @@ void showMenu() {
     printf("5) Excluir Pessoa \n");
     printf("6) Encerrar programa\n");
 
-    scanf("%d", &opt);
-
-    // Execute function according to option
-    switch (opt)
-    {
-    case 1:
-        registerPerson();
-        break;
-    
-    default:
-        printf("Opcao invalida, digite um numero de 1 a 6 \n");
-        break;
-    }
-
-    fflush(stdin);
+    scanf("%d", &option);
+    return option;
 }
 
 // VALIDATIONS
@@ -139,9 +128,9 @@ int checkIfInputIsValid(char input[], int maxChar){
     int inputLen = strlen(input);
 
     // Checks if maximum length is attendend
-    if (!(inputLen < maxChar) || (inputLen == 0))
+    if (inputLen > maxChar || (inputLen == 0))
     {
-        printf("Voce ultrapassou o limite de caracteres para esse campo!\n %s", reset);
+        printf("Voce ultrapassou o limite de caracteres para esse campo!\n %s", RESET);
         exit(0);
     }
 
@@ -149,7 +138,7 @@ int checkIfInputIsValid(char input[], int maxChar){
     for (int i=0; i < inputLen; i++) {
         if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] >= 'a' && input[i] <= 'z' || input[i] == ' '))
         {
-            printf("Os inputs conter apenas letras ou espaços!\n %s", reset);
+            printf("Os inputs conter apenas letras ou espaços!\n %s", RESET);
             exit(0);
         }
     }
@@ -164,7 +153,7 @@ int checkIfLocationExists(char userInput[], int locationType){
     char line[5572];
     char *ufToken;
     char *cityTokenNoAccent;
-    char *cityToken;
+    // char *cityToken;
 
     FILE *fp2 = fopen("locations.csv", "r");
     if (fp2 == NULL) {
@@ -193,9 +182,9 @@ int checkIfLocationExists(char userInput[], int locationType){
     {
         // VERIFY CITY
         while (fgets(line, sizeof(line), fp2)) {
-            cityToken = strtok(line, ",");
-            cityToken = strtok(NULL, ",");
-            cityToken = strtok(NULL, ",");
+            cityTokenNoAccent = strtok(line, ",");
+            cityTokenNoAccent = strtok(NULL, ",");
+            cityTokenNoAccent = strtok(NULL, ",");
             cityTokenNoAccent = strtok(NULL, ",");
             printf("%s", cityTokenNoAccent);
 
@@ -213,8 +202,10 @@ int checkIfLocationExists(char userInput[], int locationType){
     return 0;
 }
 
+
 void registerPerson(){
-    Person pw;
+    FILE *writeFile = fopen("person.txt", "a");
+    Person pw = {0};
     fflush(stdin);
 
     printf("-------------------- REGISTRO DE PESSOA --------------------\n");
@@ -235,7 +226,7 @@ void registerPerson(){
     printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
     if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0){
-        printf("O sexo digitado deve ser F ou M\n %s", reset);
+        printf("O sexo digitado deve ser F ou M\n %s", RESET);
         exit(0);
     }
     
@@ -258,7 +249,7 @@ void registerPerson(){
     checkIfInputIsValid(pw.City, sizeof(pw.City));
 
     if(checkIfLocationExists(pw.City, 0) == 0){
-        printf("Cidade inexistente\n %s", reset);
+        printf("Cidade inexistente\n %s", RESET);
         exit(0);
     }
 
@@ -268,32 +259,75 @@ void registerPerson(){
     checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
 
     if(checkIfLocationExists(pw.Uf, 1) == 0){
-        printf("UF inexistente\n %s", reset);
+        printf("UF inexistente\n %s", RESET);
         exit(0);
     }
 
     fflush(stdin);
 
-    // FILE - Writing
-    FILE *fp;
-    fp = fopen("person.txt", "a");
-
     // FILE - Check if it was successfully opened
-    if (fp == NULL)
+    if (!writeFile)
     {
-        printf("Erro ao criar base de registros, inicie novamente o cadastro!\n"); 
-        return;
+        printf("%s%s", ERRORFILE, RESET);
+        exit(0);
     }
     
     //FILE - If it was ok - print on file
-    fprintf(fp, "%s\n", pw.Cpf);
-    fprintf(fp, "%s\n", pw.Name);
-    fprintf(fp, "%s\n", pw.Sex);
-    fprintf(fp, "%d/%d/%d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
-    fprintf(fp, "%s\n", pw.City);
-    fprintf(fp, "%s\n", pw.Uf);
+    fprintf(writeFile, "%s\n", pw.Cpf);
+    fprintf(writeFile, "%s\n", pw.Name);
+    fprintf(writeFile, "%s\n", pw.Sex);
+    fprintf(writeFile, "%d/%d/%d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
+    fprintf(writeFile, "%s\n", pw.City);
+    fprintf(writeFile, "%s\n", pw.Uf);
     printf("Pessoa cadastrada com sucesso! \n");
 
     // FILE - Close file
-    fclose(fp);
+    fclose(writeFile);
+}
+
+void consultPerson(){
+    FILE *readFile = fopen("person.txt", "r");
+    Person pr = {0};
+    char cpf[16];
+
+    printf("-------------------- CONSULTA DE PESSOA --------------------\n");
+    printf("Digite o CPF para consulta: ");
+    fflush(stdin);
+    fgets(cpf, 15, stdin);
+    cpf[strcspn(cpf, "\n")] = '\0';
+
+    if (readFile == NULL)
+    {
+        printf("%s%s", ERRORFILE, RESET);
+        exit(0);
+    }
+
+    while (fscanf(readFile, "%s", pr.Cpf) != EOF) {
+        fscanf(readFile, "%s", pr.Name);
+        fscanf(readFile, "%s", pr.Sex);
+        // fscanf(readFile, "%d/%d/%d", &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn);
+        printf("COMING HERE");
+        fscanf(readFile, "%s", pr.City);
+        fscanf(readFile, "%s", pr.Uf);
+
+        printf("AND HERE!");
+        if (strcmp(pr.Cpf, cpf) == 0)
+        {
+            printf("---- DADOS DE %s ----\n", pr.Name);
+            printf("---- CPF:     %s \n", pr.Cpf);
+            printf("---- SEXO:    %s \n", pr.Sex);
+            // printf("---- DT. NASCIMENTO:    %d/%d/%d\n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
+            printf("---- CIDADE:    %s \n", pr.City);
+            printf("---- ESTADO/UF    %s \n", pr.Uf);
+            exit(0);
+        }else{
+            printf("NOT EQUAL");
+        }
+
+    }
+        
+        
+    // }
+
+    fclose(readFile);
 }
