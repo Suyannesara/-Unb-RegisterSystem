@@ -131,7 +131,7 @@ int checkIfInputIsValid(char input[], int maxChar){
     if (inputLen > maxChar || (inputLen == 0))
     {
         printf("Voce ultrapassou o limite de caracteres para esse campo!\n %s", RESET);
-        exit(0);
+        return 0;
     }
 
     // issspace - check if it is a blank space
@@ -139,7 +139,7 @@ int checkIfInputIsValid(char input[], int maxChar){
         if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] >= 'a' && input[i] <= 'z' || input[i] == ' '))
         {
             printf("Os inputs conter apenas letras ou espaços!\n %s", RESET);
-            exit(0);
+            return 0;
         }
     }
 
@@ -166,15 +166,15 @@ int checkIfLocationExists(char userInput[], int locationType){
         size = 0;
         // VERRIFY UF
         while (fgets(line, sizeof(line), fp2)) {
-        ufToken = strtok(line, ",");
-        ufToken = strtok(NULL, ",");
-        // strcpy(locations[size].Uf, token);
+            ufToken = strtok(line, ",");
+            ufToken = strtok(NULL, ",");
+            // strcpy(locations[size].Uf, token);
 
-        // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
-        if(strcmp(userInput, ufToken) == 0){
-            return 1;
-        }
-        size++;
+            // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
+            if(strcmp(userInput, ufToken) == 0){
+                return 1;
+            }
+            size++;
         }
     }
        
@@ -285,6 +285,7 @@ void registerPerson(){
 }
 
 void consultPerson(){
+
     FILE *readFile = fopen("person.txt", "r");
     Person pr = {0};
     char cpf[16];
@@ -302,7 +303,6 @@ void consultPerson(){
     }
 
     while(fgets(buffer,900,readFile) != NULL){
-        printf(pr.Cpf);
         buffer[strcspn(buffer, "\n")] = 0;
         sscanf(buffer, "%s", pr.Cpf);
         fgets(buffer, sizeof buffer, readFile);
@@ -338,3 +338,68 @@ void consultPerson(){
     }
     fclose(readFile);
 }
+
+
+void listPeopleByCity(){
+    printf("----------------- LISTAGEM POR CIDADE -----------------\n");
+    printf("Busque pelo nome da cidade: ");
+    fflush(stdin);
+
+    Locations city;
+    // Receive input
+    fgets(city.Name, sizeof(city.Name), stdin);
+    city.Name[strcspn(city.Name, "\n")] = '\0';
+    isInputValid = checkIfInputIsValid(city.Name, sizeof(city.Name));
+
+    // Check if input is valid // Check if city Name exists
+    if ((isInputValid != 1) || checkIfLocationExists(city.Name, 0) != 1){
+        printf("%s\n", RESET);
+        exit(0);
+    }
+    
+
+    // Search on person file. Compare each city line with Name, see the ones that are compatible and insert in a array;
+
+    // Anbrir arquivo para leitura
+    FILE *readFile = fopen("person.txt", "r");
+    char line[200];
+    
+    Person personByCityStruct;
+    Person listOfPeople[200];
+
+    int i = 0;
+    int j = 0;
+    // Ler cada linha de cidade
+    while(fscanf(readFile, 
+        "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
+        personByCityStruct.Cpf, 
+        personByCityStruct.Name, 
+        personByCityStruct.Sex, 
+        &personByCityStruct.DayBorn, 
+        &personByCityStruct.MonthBorn, 
+        &personByCityStruct.yearBorn, 
+        personByCityStruct.City, 
+        personByCityStruct.Uf) != EOF){
+
+
+        if (strcmp(city.Name, personByCityStruct.City) == 0)
+        {
+            // printf("%s   |   %s\n", personByCityStruct.Cpf, personByCityStruct.Name);
+
+            listOfPeople[i] = personByCityStruct;
+        }
+
+        i++;
+    }
+
+    for (j = 0; j < 3; j++)
+    {
+        printf("\n%s   |   %s", listOfPeople[j].Cpf, listOfPeople[j].Name);
+    }
+
+    fclose(readFile);
+    exit(0);
+}
+
+// CHECK IF INPUTS ARE VALID WHEN CALLING IT
+// PUT DEFINES INSTEAD OF NUMBERS IN []
