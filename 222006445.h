@@ -24,7 +24,7 @@ typedef struct
 Locations locations[1000];
 
 int i = 0;
-int isCpfValid, isInputValid = 0;
+int isCpfValid, isInputValid, isDateValid = 0;
 int isElementPresentInGroup = 0;
 char RESET[] = {"-------------Reinicie a Aplicação ------------"};
 char locationsRows[10];
@@ -122,6 +122,44 @@ int validateCpf(char cpf[])
     return 1;
 }
 
+int checkIfDateValid(int d, int m, int y){
+    int leapYear = 0;
+
+    if (y < 0) {
+        return 0;
+    };
+
+    if (m < 1 || m > 12) {
+        return 0;
+    };
+
+    if (d < 1) {
+        return 0;
+    };
+
+    int monthMaxDays = 31;
+
+    if (m == 2) {
+        if((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)){
+            leapYear = 1;
+        };
+
+        if (leapYear == 1) {
+            monthMaxDays = 29;
+        } else {
+            monthMaxDays = 28;
+        };
+
+    } else if (m == 4 || m == 6 || m == 9 || m == 11) {
+        monthMaxDays = 30;
+    };
+
+    if (d > monthMaxDays) {
+        return 0;
+    };
+
+    return 1;
+}
 
 int checkIfInputIsValid(char input[], int maxChar){  
     // strlen(input <= maxChar) ? (continue) : (return 0);
@@ -240,6 +278,13 @@ void registerPerson(){
 
     printf("Ano Nascimento: ");
     scanf("%d", &pw.yearBorn);
+    isDateValid = checkIfDateValid(pw.DayBorn, pw.MonthBorn, pw.yearBorn);
+    if (isDateValid != 1)
+    {
+        printf("Data de nascimento inválida\n%s", RESET);
+        exit(0);
+    }
+    
     fflush(stdin);
 
     printf("Cidade: ");
@@ -275,7 +320,7 @@ void registerPerson(){
     fprintf(writeFile, "%s\n", pw.Cpf);
     fprintf(writeFile, "%s\n", pw.Name);
     fprintf(writeFile, "%s\n", pw.Sex);
-    fprintf(writeFile, "%d/%d/%d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
+    fprintf(writeFile, "%02d/%02d/%02d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
     fprintf(writeFile, "%s\n", pw.City);
     fprintf(writeFile, "%s\n", pw.Uf);
     printf("Pessoa cadastrada com sucesso! \n");
@@ -410,3 +455,9 @@ void listPeopleByCity(){
 
 // CHECK IF INPUTS ARE VALID WHEN CALLING IT
 // PUT DEFINES INSTEAD OF NUMBERS IN []
+// ARRUMAR RETURNS AND EXIT
+// ARRUMAR ERROR MESSAGES
+// ARRUMAR COMENTARIOS
+// CRIAR FILE DE TESTES
+// CHECK IF CPF IS VALID
+// REMOVE PRINTFS IN ENGLISH
