@@ -339,6 +339,12 @@ void consultPerson(){
     fclose(readFile);
 }
 
+int orderPeopleInAlphabet(const void *p1, const void *p2){
+    Person *pa = (Person *)p1;
+    Person *pb = (Person *)p2;
+    return strcmp(pa->Name, pb->Name);
+}
+
 
 void listPeopleByCity(){
     printf("----------------- LISTAGEM POR CIDADE -----------------\n");
@@ -367,9 +373,10 @@ void listPeopleByCity(){
     Person personByCityStruct;
     Person listOfPeople[200];
 
-    int i = 0;
     int j = 0;
-    // Ler cada linha de cidade
+    int numberOfPeople = 0;
+
+    // Read each line on file
     while(fscanf(readFile, 
         "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
         personByCityStruct.Cpf, 
@@ -384,15 +391,15 @@ void listPeopleByCity(){
 
         if (strcmp(city.Name, personByCityStruct.City) == 0)
         {
-            // printf("%s   |   %s\n", personByCityStruct.Cpf, personByCityStruct.Name);
-
-            listOfPeople[i] = personByCityStruct;
+            listOfPeople[numberOfPeople] = personByCityStruct;
+            numberOfPeople++;
         }
-
-        i++;
     }
 
-    for (j = 0; j < 3; j++)
+    // Sort people by name from A to Z
+    qsort(listOfPeople, numberOfPeople, sizeof(Person), orderPeopleInAlphabet);
+
+    for (j = 0; j < numberOfPeople; j++)
     {
         printf("\n%s   |   %s", listOfPeople[j].Cpf, listOfPeople[j].Name);
     }
