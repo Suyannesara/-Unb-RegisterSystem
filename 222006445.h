@@ -1,7 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include <time.h>
+
+// CREATE AND DEFINE VARIABLES VALUES
+
+// VALIDATE CPF FUNCTION
+#define N_CPF_DIGITS 11
+
+// VALIDATE DATE FUNCTION
+#define MAX_DAYS_IN_MONTH 31
 
 typedef struct {
     char Cpf[16];
@@ -31,6 +38,8 @@ char locationsRows[10];
 int ufExists;
 
 // ERROR MESSAGES
+char ERRORCPF[] = {"CPF inválido\n"};
+char ERRORDATE[] = {"Data de nascimento inválida\n"};
 char ERRORFILE[] = {"⚠️Erro ao abrir a base de dados\n"};
 
 
@@ -52,78 +61,74 @@ int executeMenu() {
 int validateCpf(char cpf[])
 {
     int i, d1, d2, r;
-    int digits[11];
+    int cpfDigits[N_CPF_DIGITS];
 
-    // check if string is 11 characters long
-    if (strlen(cpf) != 11)
+    // Check if CPF has at least and at maximum 11 digits
+    if (strlen(cpf) != N_CPF_DIGITS)
     {
-        printf("Invalid CPF: Must be 11 digits long.\n");
+        printf("O CPF precisa ter 11 digitos, sem traços ou pontos.\n");
         return 0;
     }
 
-    // check if string contains only digits
+    // Check if input has only NUMBERS 0-9
     for (i = 0; i < 11; i++)
     {
         if (!isdigit(cpf[i]))
         {
-            printf("Invalid CPF: Must contain only digits.\n");
+            printf("O CPF deve ser composto apenas de números, sem traços ou pontos.\n");
             return 0;
         }
-        digits[i] = cpf[i] - '0';
+        cpfDigits[i] = cpf[i] - '0';
     }
 
-    // check for invalid CPF numbers according to the Ministry of Agriculture in Brazil
-    // check if all digits are the same
+    // Check if CPF inputed is composed of the SAME NUMBER. Eg: 000000000000
     for (i = 1; i < 11; i++) {
-        if (digits[i] != digits[0]) {
+        if (cpfDigits[i] != cpfDigits[0]) {
             break;
         }
     }
-    if (i == 11) {
-        printf("Invalid CPF: All digits are the same.\n");
+    if (i == N_CPF_DIGITS) {
         return 0;
     }
 
-    // calculate first verification digit
+    // Verify second CPF digit
     d1 = 0;
     for (i = 0; i < 9; i++)
     {
-        d1 += digits[i] * (10 - i);
+        d1 += cpfDigits[i] * (10 - i);
     }
     r = 11 - (d1 % 11);
     if (r == 10 || r == 11)
     {
         r = 0;
     }
-    if (r != digits[9])
+    if (r != cpfDigits[9])
     {
-        printf("Invalid CPF: Incorrect first verification digit.\n");
         return 0;
     }
 
-    // calculate second verification digit
+    // Verify second CPF digit
     d2 = 0;
     for (i = 0; i < 10; i++)
     {
-        d2 += digits[i] * (11 - i);
+        d2 += cpfDigits[i] * (11 - i);
     }
     r = 11 - (d2 % 11);
     if (r == 10 || r == 11)
     {
         r = 0;
     }
-    if (r != digits[10])
+    if (r != cpfDigits[10])
     {
-        printf("Invalid CPF: Incorrect second verification digit.\n");
         return 0;
     }
 
-    printf("Valid CPF number!\n");
     return 1;
 }
 
 int checkIfDateValid(int d, int m, int y){
     int leapYear = 0;
+    int monthMaxDays = MAX_DAYS_IN_MONTH;
 
     if (y < 0) {
         return 0;
@@ -137,7 +142,6 @@ int checkIfDateValid(int d, int m, int y){
         return 0;
     };
 
-    int monthMaxDays = 31;
 
     if (m == 2) {
         if((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)){
@@ -162,10 +166,9 @@ int checkIfDateValid(int d, int m, int y){
 }
 
 int checkIfInputIsValid(char input[], int maxChar){  
-    // strlen(input <= maxChar) ? (continue) : (return 0);
     int inputLen = strlen(input);
 
-    // Checks if maximum length is attendend
+    // Check if maximum length is attendend
     if (inputLen > maxChar || (inputLen == 0))
     {
         printf("Voce ultrapassou o limite de caracteres para esse campo!\n %s", RESET);
@@ -240,11 +243,13 @@ int checkIfLocationExists(char userInput[], int locationType){
 }
 
 
+// CORE CODE FUNCTIONS
 void registerPerson(){
     FILE *writeFile = fopen("person.txt", "a");
     Person pw = {0};
     fflush(stdin);
 
+    // Getting people`s data
     printf("-------------------- REGISTRO DE PESSOA --------------------\n");
     printf("CPF: ");
     fgets(pw.Cpf, 15, stdin);
@@ -252,10 +257,10 @@ void registerPerson(){
     isCpfValid = validateCpf(pw.Cpf);
     if (isCpfValid == 0)
     {
+        printf("\n%s", ERRORCPF);
         exit(0);
     }
     
-
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
     checkIfInputIsValid(pw.Name, sizeof(pw.Name));
@@ -266,10 +271,8 @@ void registerPerson(){
         printf("O sexo digitado deve ser F ou M\n %s", RESET);
         exit(0);
     }
-    
     checkIfInputIsValid(pw.Sex, sizeof(pw.Sex));
 
-    //FUNCTION TO VALIDATE DATAAA!!!!!
     printf("Dia Nascimento: ");
     scanf("%d", &pw.DayBorn);
 
@@ -281,7 +284,7 @@ void registerPerson(){
     isDateValid = checkIfDateValid(pw.DayBorn, pw.MonthBorn, pw.yearBorn);
     if (isDateValid != 1)
     {
-        printf("Data de nascimento inválida\n%s", RESET);
+        printf("%s%s", ERRORDATE, RESET);
         exit(0);
     }
     
