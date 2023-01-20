@@ -3,12 +3,8 @@
 #include <string.h>
 
 // CREATE AND DEFINE VARIABLES VALUES
-
 #define LOCATIONS_LINES 5572
-// VALIDATE CPF FUNCTION
 #define N_CPF_DIGITS 11
-
-// VALIDATE DATE FUNCTION
 #define MAX_DAYS_IN_MONTH 31
 
 typedef struct {
@@ -29,21 +25,23 @@ typedef struct
     
 } Locations;
 
-Locations locations[1000];
-
 int i = 0;
-int isCpfValid, isInputValid, isDateValid = 0;
-int isElementPresentInGroup = 0;
-char RESET[] = {"-------------Reinicie a Aplicação ------------"};
-char locationsRows[10];
-int ufExists;
+int isCpfValid, 
+isInputValid, 
+isDateValid, 
+ufExists, 
+isElementPresentInGroup = 0;
 
-// ERROR MESSAGES
-char ERRORCPF[] = {"CPF inválido\n"};
-char ERRORDATE[] = {"Data de nascimento inválida\n"};
-char ERRORFILE[] = {"⚠️Erro ao abrir a base de dados\n"};
+// MESSAGES
+char RESET[] = {"\n------------- REINICIANDO O SISTEMA ------------"};
+char ERRORCPF[] = {"CPF invalido\n"};
+char ERROR_CPF_EXISTS[] = {"CPF ja cadastrado no sistema!\n"};
+char ERRORDATE[] = {"Data de nascimento invalida\n"};
+char ERRORFILE[] = {"Erro ao abrir a base de dados\n"};
+char SUCCESSFILE[] = {"\nAbrindo base de dados . . .\n"};
 
 
+// INIT CODE FUNCTION
 int executeMenu() {
     int option;
     printf("Escolha uma das opcoes a seguir: \n");
@@ -58,7 +56,7 @@ int executeMenu() {
     return option;
 }
 
-// VALIDATIONS
+// VALIDATIONS AND AUXILIAR FUNCTIONS
 int validateCpf(char cpf[])
 {
     int i, d1, d2, r;
@@ -127,6 +125,18 @@ int validateCpf(char cpf[])
     return 1;
 }
 
+void isFileOpen(readFile){
+
+    if (readFile == NULL)
+    {
+        printf("%s%s", ERRORFILE, RESET);
+        exit(0);
+    }
+    printf("%s", SUCCESSFILE);
+
+    return;
+}
+
 int checkIfDateValid(int d, int m, int y){
     int leapYear = 0;
     int monthMaxDays = MAX_DAYS_IN_MONTH;
@@ -188,7 +198,6 @@ int checkIfInputIsValid(char input[], int maxChar){
     return 1;
 }
 
-
 int checkIfLocationExists(char userInput[], int locationType){
 
     int size = 0;
@@ -242,6 +251,11 @@ int checkIfLocationExists(char userInput[], int locationType){
     return 0;
 }
 
+int orderPeopleInAlphabet(const void *p1, const void *p2){
+    Person *pa = (Person *)p1;
+    Person *pb = (Person *)p2;
+    return strcmp(pa->Name, pb->Name);
+}
 
 // CORE CODE FUNCTIONS
 void registerPerson(){
@@ -260,6 +274,7 @@ void registerPerson(){
         printf("\n%s", ERRORCPF);
         exit(0);
     }
+    // checkIfCpfIsRegistered(pw.Cpf);
     
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
@@ -335,69 +350,51 @@ void registerPerson(){
 }
 
 void consultPerson(){
-
-    FILE *readFile = fopen("person.txt", "r");
     Person pr = {0};
     char cpf[16];
     char buffer[1000];
+
     printf("-------------------- CONSULTA DE PESSOA --------------------\n");
+    FILE *readFile = fopen("person.txt", "r");
+
+    isFileOpen(readFile);
+
     printf("Digite o CPF para consulta: ");
     fflush(stdin);
     fgets(cpf, 12, stdin);
     cpf[strcspn(cpf, "\n")] = '\0';
 
-    if (readFile == NULL)
-    {
-        printf("%s%s", ERRORFILE, RESET);
-        exit(0);
-    }
-
-    while(fgets(buffer,900,readFile) != NULL){
-        buffer[strcspn(buffer, "\n")] = 0;
-        sscanf(buffer, "%s", pr.Cpf);
-        fgets(buffer, sizeof buffer, readFile);
-        buffer[strcspn(buffer, "\n")] = 0;
-        sscanf(buffer, "%[^\n]s", pr.Name);
-        fgets(buffer, sizeof buffer, readFile);
-        buffer[strcspn(buffer, "\n")] = 0;
-        sscanf(buffer, "%s", pr.Sex);
-        fgets(buffer, sizeof buffer, readFile);
-        buffer[strcspn(buffer, "\n")] = 0;
-        sscanf(buffer, "%d/%d/%d", &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn);
-        fgets(buffer, sizeof buffer, readFile);
-        buffer[strcspn(buffer, "\n")] = 0;
-        sscanf(buffer, "%[^\n]s", pr.City);
-        fgets(buffer, sizeof buffer, readFile);
-        buffer[strcspn(buffer, "\n")] = 0;
-        sscanf(buffer, "%s", pr.Uf);
-
-       
+    while(fscanf(readFile, 
+    "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
+    pr.Cpf, pr.Name, pr.Sex, &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn, pr.City, pr.Uf) != EOF){
         if (strcmp(pr.Cpf, cpf) == 0)
         {
             printf("---- DADOS DE: %s ----\n", pr.Name);
             printf("---- CPF:               %s \n", pr.Cpf);
             printf("---- SEXO:              %s \n", pr.Sex);
-            printf("---- DT. NASCIMENTO:    %d/%d/%d \n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
+            printf("---- DT. NASCIMENTO:    %0.2d/%0.2d/%d \n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
             printf("---- CIDADE:            %s \n", pr.City);
             printf("---- ESTADO/UF          %s \n", pr.Uf);
             exit(0);
         }
+        
+    };
 
-        memset(buffer, 0, sizeof(buffer));
-        memset(pr.Cpf, '\0', sizeof(pr.Cpf));
-    }
     fclose(readFile);
-}
-
-int orderPeopleInAlphabet(const void *p1, const void *p2){
-    Person *pa = (Person *)p1;
-    Person *pb = (Person *)p2;
-    return strcmp(pa->Name, pb->Name);
 }
 
 
 void listPeopleByCity(){
+    int j = 0;
+    int numberOfPeople = 0;
+    Person personByCityStruct;
+    Person listOfPeople[200];
+
     printf("----------------- LISTAGEM POR CIDADE -----------------\n");
+
+    FILE *readFile = fopen("person.txt", "r");
+    isFileOpen(readFile);
+
     printf("Busque pelo nome da cidade: ");
     fflush(stdin);
 
@@ -415,17 +412,6 @@ void listPeopleByCity(){
     
 
     // Search on person file. Compare each city line with Name, see the ones that are compatible and insert in a array;
-
-    // Anbrir arquivo para leitura
-    FILE *readFile = fopen("person.txt", "r");
-    char line[200];
-    
-    Person personByCityStruct;
-    Person listOfPeople[200];
-
-    int j = 0;
-    int numberOfPeople = 0;
-
     // Read each line on file
     while(fscanf(readFile, 
         "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
@@ -437,7 +423,6 @@ void listPeopleByCity(){
         &personByCityStruct.yearBorn, 
         personByCityStruct.City, 
         personByCityStruct.Uf) != EOF){
-
 
         if (strcmp(city.Name, personByCityStruct.City) == 0)
         {
@@ -458,8 +443,7 @@ void listPeopleByCity(){
     exit(0);
 }
 
-// ARRUMAR RETURNS AND EXIT
-// ARRUMAR ERROR MESSAGES
+
 // ARRUMAR COMENTARIOS
 // CRIAR FILE DE TESTES
 // CHECK IF CPF IS VALID
