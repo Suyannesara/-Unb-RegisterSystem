@@ -198,6 +198,33 @@ int checkIfInputIsValid(char input[], int maxChar){
     return 1;
 }
 
+void checkIfCpfIsRegistered(char cpf[]){
+    FILE *readFile = fopen("person.txt", "r");
+    isFileOpen(readFile);
+
+    Person personData;
+
+    // Read data
+    while(fscanf(readFile, 
+        "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
+        personData.Cpf, 
+        personData.Name, 
+        personData.Sex, 
+        &personData.DayBorn, 
+        &personData.MonthBorn, 
+        &personData.yearBorn, 
+        personData.City, 
+        personData.Uf) != EOF){
+
+            if (strcmp(cpf, personData.Cpf) == 0)
+            {
+                printf("%s%s", ERROR_CPF_EXISTS, RESET);
+                exit(0);
+            }
+            
+        }
+}
+
 int checkIfLocationExists(char userInput[], int locationType){
 
     int size = 0;
@@ -274,7 +301,7 @@ void registerPerson(){
         printf("\n%s", ERRORCPF);
         exit(0);
     }
-    // checkIfCpfIsRegistered(pw.Cpf);
+    checkIfCpfIsRegistered(pw.Cpf);
     
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
