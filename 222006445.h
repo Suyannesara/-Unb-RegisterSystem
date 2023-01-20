@@ -39,6 +39,10 @@ char ERROR_CPF_EXISTS[] = {"CPF ja cadastrado no sistema!\n"};
 char ERRORDATE[] = {"Data de nascimento invalida\n"};
 char ERRORFILE[] = {"Erro ao abrir a base de dados\n"};
 char SUCCESSFILE[] = {"\nAbrindo base de dados . . .\n"};
+char ERRORSEX[] = {"O sexo digitado deve ser F ou M\n"};
+char ERROR_UF[] = {"UF inexistente\n"};
+char ERROR_CITY[] = {"CIDADE inexistente\n"};
+char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
 
 
 // INIT CODE FUNCTION
@@ -90,7 +94,7 @@ int validateCpf(char cpf[])
         return 0;
     }
 
-    // Verify second CPF digit
+    // Verify first CPF digit
     d1 = 0;
     for (i = 0; i < 9; i++)
     {
@@ -126,11 +130,11 @@ int validateCpf(char cpf[])
 }
 
 void isFileOpen(readFile){
-
-    if (readFile == NULL)
+    // check if file has been succesfuly opened
+    if (!readFile)
     {
         printf("%s%s", ERRORFILE, RESET);
-        exit(0);
+        exit(1);
     }
     printf("%s", SUCCESSFILE);
 
@@ -219,7 +223,7 @@ void checkIfCpfIsRegistered(char cpf[]){
             if (strcmp(cpf, personData.Cpf) == 0)
             {
                 printf("%s%s", ERROR_CPF_EXISTS, RESET);
-                exit(0);
+                exit(1);
             }
             
         }
@@ -233,10 +237,7 @@ int checkIfLocationExists(char userInput[], int locationType){
     char *cityTokenNoAccent;
 
     FILE *fp2 = fopen("locations.csv", "r");
-    if (fp2 == NULL) {
-        printf("Error opening file\n");
-        exit(0);
-    }
+    isFileOpen(fp2);
 
     if (locationType == 1)
     {
@@ -245,9 +246,8 @@ int checkIfLocationExists(char userInput[], int locationType){
         while (fgets(locationLine, sizeof(locationLine), fp2)) {
             ufToken = strtok(locationLine, ",");
             ufToken = strtok(NULL, ",");
-            // strcpy(locations[size].Uf, token);
 
-            // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
+            // Verify if TOKEN == INPUT - If so, UF EXISTS
             if(strcmp(userInput, ufToken) == 0){
                 return 1;
             }
@@ -260,11 +260,11 @@ int checkIfLocationExists(char userInput[], int locationType){
         // VERIFY CITY
         while (fgets(locationLine, sizeof(locationLine), fp2)) {
             cityTokenNoAccent = strtok(locationLine, ",");
-            cityTokenNoAccent = strtok(NULL, ",");
-            cityTokenNoAccent = strtok(NULL, ",");
-            cityTokenNoAccent = strtok(NULL, ",");
+            cityTokenNoAccent = strtok(NULL, ","); // Receive second line
+            cityTokenNoAccent = strtok(NULL, ","); // Receive third line
+            cityTokenNoAccent = strtok(NULL, ","); // Receive forth file line
 
-            // VERIFICAR SE O TOKEN == INPUT - SES IM, UF EXISTE
+            // Verify if TOKEN == INPUT - If so, CITY EXISTS
             if(strcmp(userInput, cityTokenNoAccent) == 0){
                 return 1;
             }
@@ -298,21 +298,21 @@ void registerPerson(){
     isCpfValid = validateCpf(pw.Cpf);
     if (isCpfValid == 0)
     {
-        printf("\n%s", ERRORCPF);
-        exit(0);
+        printf("\n%s%s", ERRORCPF,RESET);
+        exit(1);
     }
     checkIfCpfIsRegistered(pw.Cpf);
     
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
     isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
-    if (isInputValid != 1){exit(0);}
+    if (isInputValid != 1){exit(1);}
 
     printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
     if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0){
-        printf("O sexo digitado deve ser F ou M\n %s", RESET);
-        exit(0);
+        printf("%s%s", ERRORSEX, RESET);
+        exit(1);
     }
 
     printf("Dia Nascimento: ");
@@ -327,7 +327,7 @@ void registerPerson(){
     if (isDateValid != 1)
     {
         printf("%s%s", ERRORDATE, RESET);
-        exit(0);
+        exit(1);
     }
     
     fflush(stdin);
@@ -336,22 +336,22 @@ void registerPerson(){
     fgets(pw.City, sizeof(pw.City), stdin);
     pw.City[strcspn(pw.City, "\n")] = '\0';
     isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
-    if (isInputValid != 1){exit(0);}
+    if (isInputValid != 1){exit(1);}
 
     if(checkIfLocationExists(pw.City, 0) == 0){
-        printf("Cidade inexistente\n %s", RESET);
-        exit(0);
+        printf("%s%s", ERROR_CITY, RESET);
+        exit(1);
     }
 
     printf("UF/Estado: ");
-    // verificar se a UF digitada tem somente 2 digitos?
+    // Verify if USER UF has only 2 digits
     scanf("%s", pw.Uf);
     isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
-    if (isInputValid != 1){exit(0);}
+    if (isInputValid != 1){exit(1);}
 
     if(checkIfLocationExists(pw.Uf, 1) == 0){
-        printf("UF inexistente\n %s", RESET);
-        exit(0);
+        printf("%s%s", ERROR_UF, RESET);
+        exit(1);
     }
 
     fflush(stdin);
@@ -360,7 +360,7 @@ void registerPerson(){
     if (!writeFile)
     {
         printf("%s%s", ERRORFILE, RESET);
-        exit(0);
+        exit(1);
     }
     
     //FILE - If it was ok - print on file
@@ -370,7 +370,7 @@ void registerPerson(){
     fprintf(writeFile, "%02d/%02d/%02d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
     fprintf(writeFile, "%s\n", pw.City);
     fprintf(writeFile, "%s\n", pw.Uf);
-    printf("Pessoa cadastrada com sucesso! \n");
+    printf("%s\n", SUCCESS_REGISTERED);
 
     // FILE - Close file
     fclose(writeFile);
@@ -379,7 +379,6 @@ void registerPerson(){
 void consultPerson(){
     Person pr = {0};
     char cpf[16];
-    char buffer[1000];
 
     printf("-------------------- CONSULTA DE PESSOA --------------------\n");
     FILE *readFile = fopen("person.txt", "r");
@@ -402,7 +401,7 @@ void consultPerson(){
             printf("---- DT. NASCIMENTO:    %0.2d/%0.2d/%d \n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
             printf("---- CIDADE:            %s \n", pr.City);
             printf("---- ESTADO/UF          %s \n", pr.Uf);
-            exit(0);
+            exit(1);
         }
         
     };
@@ -434,7 +433,7 @@ void listPeopleByCity(){
     // Check if input is valid // Check if city Name exists
     if ((isInputValid != 1) || checkIfLocationExists(city.Name, 0) != 1){
         printf("%s\n", RESET);
-        exit(0);
+        exit(1);
     }
     
 
@@ -467,11 +466,4 @@ void listPeopleByCity(){
     }
 
     fclose(readFile);
-    exit(0);
 }
-
-
-// ARRUMAR COMENTARIOS
-// CRIAR FILE DE TESTES
-// CHECK IF CPF IS VALID
-// REMOVE PRINTFS IN ENGLISH
