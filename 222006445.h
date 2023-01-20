@@ -4,6 +4,7 @@
 
 // CREATE AND DEFINE VARIABLES VALUES
 
+#define LOCATIONS_LINES 5572
 // VALIDATE CPF FUNCTION
 #define N_CPF_DIGITS 11
 
@@ -191,10 +192,9 @@ int checkIfInputIsValid(char input[], int maxChar){
 int checkIfLocationExists(char userInput[], int locationType){
 
     int size = 0;
-    char line[5572];
+    char locationLine[LOCATIONS_LINES];
     char *ufToken;
     char *cityTokenNoAccent;
-    // char *cityToken;
 
     FILE *fp2 = fopen("locations.csv", "r");
     if (fp2 == NULL) {
@@ -206,8 +206,8 @@ int checkIfLocationExists(char userInput[], int locationType){
     {
         size = 0;
         // VERRIFY UF
-        while (fgets(line, sizeof(line), fp2)) {
-            ufToken = strtok(line, ",");
+        while (fgets(locationLine, sizeof(locationLine), fp2)) {
+            ufToken = strtok(locationLine, ",");
             ufToken = strtok(NULL, ",");
             // strcpy(locations[size].Uf, token);
 
@@ -222,8 +222,8 @@ int checkIfLocationExists(char userInput[], int locationType){
     if (locationType == 0)
     {
         // VERIFY CITY
-        while (fgets(line, sizeof(line), fp2)) {
-            cityTokenNoAccent = strtok(line, ",");
+        while (fgets(locationLine, sizeof(locationLine), fp2)) {
+            cityTokenNoAccent = strtok(locationLine, ",");
             cityTokenNoAccent = strtok(NULL, ",");
             cityTokenNoAccent = strtok(NULL, ",");
             cityTokenNoAccent = strtok(NULL, ",");
@@ -263,7 +263,8 @@ void registerPerson(){
     
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
-    checkIfInputIsValid(pw.Name, sizeof(pw.Name));
+    isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
+    if (isInputValid != 1){exit(0);}
 
     printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
@@ -271,7 +272,6 @@ void registerPerson(){
         printf("O sexo digitado deve ser F ou M\n %s", RESET);
         exit(0);
     }
-    checkIfInputIsValid(pw.Sex, sizeof(pw.Sex));
 
     printf("Dia Nascimento: ");
     scanf("%d", &pw.DayBorn);
@@ -293,7 +293,8 @@ void registerPerson(){
     printf("Cidade: ");
     fgets(pw.City, sizeof(pw.City), stdin);
     pw.City[strcspn(pw.City, "\n")] = '\0';
-    checkIfInputIsValid(pw.City, sizeof(pw.City));
+    isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
+    if (isInputValid != 1){exit(0);}
 
     if(checkIfLocationExists(pw.City, 0) == 0){
         printf("Cidade inexistente\n %s", RESET);
@@ -303,7 +304,8 @@ void registerPerson(){
     printf("UF/Estado: ");
     // verificar se a UF digitada tem somente 2 digitos?
     scanf("%s", pw.Uf);
-    checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
+    isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
+    if (isInputValid != 1){exit(0);}
 
     if(checkIfLocationExists(pw.Uf, 1) == 0){
         printf("UF inexistente\n %s", RESET);
@@ -456,8 +458,6 @@ void listPeopleByCity(){
     exit(0);
 }
 
-// CHECK IF INPUTS ARE VALID WHEN CALLING IT
-// PUT DEFINES INSTEAD OF NUMBERS IN []
 // ARRUMAR RETURNS AND EXIT
 // ARRUMAR ERROR MESSAGES
 // ARRUMAR COMENTARIOS
