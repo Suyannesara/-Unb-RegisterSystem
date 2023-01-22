@@ -5,7 +5,7 @@ int menuOption = 0;
 char LOADING_OPTION[] = {"\nOpcao em construcao . . .\n"};
 char INVALID_OPTION[] = {"\nOpcao invalida, digite um numero de 1 a 6\n"};
 char FINISH_PROGRAM[] = {"\n-------------- FINALIZANDO PROGRAMA -------------\n"};
-char INIT_APP[] = {"\n-------------------------- ATENCAO -----------------------\nCaro usuario, para funcionamento correto do programa:\n - Insira textos e caracteres em sua totalidade em letras MAIUSCULAS\n - O CPF digitado para consulta, cadastro ou outros, deve ser composto apenas de numeros\n - Os nomes das cidades e UFS devem ser escritos sem acento e em MAIUSCULO\n - A UF/ESTADO digita deve ser composta apenas de DOIS caracteres\n\n DIGITE ENTER PARA PROSSEGUIR:"};
+char INIT_APP[] = {"\n-------------------------- ATENCAO -----------------------\nCaro usuario, para funcionamento correto do programa:\n - Insira textos e caracteres preferencialmente em letras MAIUSCULAS\n - O CPF digitado para consulta, cadastro ou outros, deve ser composto apenas de numeros\n - Os nomes das cidades e UFS devem ser escritos sem acento\n - A UF/ESTADO digitada deve ser composta apenas de DOIS caracteres\n\n PRESSIONE ENTER PARA PROSSEGUIR:"};
 
 int main()
 {

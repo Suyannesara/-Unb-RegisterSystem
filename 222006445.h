@@ -453,6 +453,7 @@ void listPeopleByCity(){
     // Receive input
     fgets(city.Name, sizeof(city.Name), stdin);
     city.Name[strcspn(city.Name, "\n")] = '\0';
+    tranformStringToUpper(&city.Name);
     isInputValid = checkIfInputIsValid(city.Name, sizeof(city.Name));
 
     // Check if input is valid // Check if city Name exists
