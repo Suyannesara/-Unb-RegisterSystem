@@ -44,6 +44,7 @@ char ERRORSEX[] = {"O sexo digitado deve ser F ou M\n"};
 char ERROR_UF[] = {"UF inexistente\n"};
 char ERROR_CITY[] = {"CIDADE inexistente\n"};
 char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
+char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada!\n"};
 
 
 // INIT CODE FUNCTION
@@ -420,6 +421,7 @@ void consultPerson(){
 void listPeopleByCity(){
     int j = 0;
     int numberOfPeople = 0;
+    int hasSomeoneInCity = 0;
     Person personByCityStruct;
     Person listOfPeople[200];
 
@@ -459,10 +461,18 @@ void listPeopleByCity(){
 
         if (strcmp(city.Name, personByCityStruct.City) == 0)
         {
+            int hasSomeoneInCity = 1;
             listOfPeople[numberOfPeople] = personByCityStruct;
             numberOfPeople++;
         }
     }
+
+    if (hasSomeoneInCity == 0)
+    {
+        printf("%s", ERROR_NOBODY_IN_CITY);
+        exit(1);
+    }
+    
 
     // Sort people by name from A to Z
     qsort(listOfPeople, numberOfPeople, sizeof(Person), orderPeopleInAlphabet);
