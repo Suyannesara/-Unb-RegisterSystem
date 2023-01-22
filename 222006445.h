@@ -192,7 +192,7 @@ int checkIfInputIsValid(char input[], int maxChar){
 
     // issspace - check if it is a blank space
     for (int i=0; i < inputLen; i++) {
-        if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] >= 'a' && input[i] <= 'z' || input[i] == ' '))
+        if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] == ' '))
         {
             printf("Os inputs conter apenas letras ou espaços!\n %s", RESET);
             return 0;
@@ -284,6 +284,18 @@ int orderPeopleInAlphabet(const void *p1, const void *p2){
     return strcmp(pa->Name, pb->Name);
 }
 
+// Using reference to upperString
+void tranformStringToUpper(char *string){
+    char caracter;
+    int i;
+
+    for (i = 0; i < strlen(string); i++)
+    {
+        caracter = string[i];
+        string[i] = toupper(caracter);
+    }
+}
+
 // CORE CODE FUNCTIONS
 void registerPerson(){
     FILE *writeFile = fopen("person.txt", "a");
@@ -305,11 +317,13 @@ void registerPerson(){
     
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
+    tranformStringToUpper(&pw.Name);
     isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
     if (isInputValid != 1){exit(1);}
 
     printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
+    tranformStringToUpper(&pw.Sex);
     if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0){
         printf("%s%s", ERRORSEX, RESET);
         exit(1);
@@ -335,6 +349,7 @@ void registerPerson(){
     printf("Cidade: ");
     fgets(pw.City, sizeof(pw.City), stdin);
     pw.City[strcspn(pw.City, "\n")] = '\0';
+    tranformStringToUpper(&pw.City);
     isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
     if (isInputValid != 1){exit(1);}
 
@@ -346,6 +361,7 @@ void registerPerson(){
     printf("UF/Estado: ");
     // Verify if USER UF has only 2 digits
     scanf("%s", pw.Uf);
+    tranformStringToUpper(&pw.Uf);
     isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
     if (isInputValid != 1){exit(1);}
 
