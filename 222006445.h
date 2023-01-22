@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 // CREATE AND DEFINE VARIABLES VALUES
 #define LOCATIONS_LINES 5572
@@ -36,9 +36,10 @@ isElementPresentInGroup = 0;
 char RESET[] = {"\n------------- REINICIANDO O SISTEMA ------------"};
 char ERRORCPF[] = {"CPF invalido\n"};
 char ERROR_CPF_EXISTS[] = {"CPF ja cadastrado no sistema!\n"};
+char ERROR_CPF_NOT_EXISTS[] = {"CPF nao encontrado na base de dados\n"};
 char ERRORDATE[] = {"Data de nascimento invalida\n"};
 char ERRORFILE[] = {"Erro ao abrir a base de dados\n"};
-char SUCCESSFILE[] = {"\nAbrindo base de dados . . .\n"};
+// char SUCCESSFILE[] = {"\nAbrindo base de dados . . .\n"};
 char ERRORSEX[] = {"O sexo digitado deve ser F ou M\n"};
 char ERROR_UF[] = {"UF inexistente\n"};
 char ERROR_CITY[] = {"CIDADE inexistente\n"};
@@ -52,7 +53,7 @@ int executeMenu() {
     printf("1) Cadastrar Pessoa \n");
     printf("2) Consultar Pessoa \n");
     printf("3) Listar pessoas por cidade \n");
-    printf("4) Gerar relatório \n");
+    printf("4) Gerar relatorio \n");
     printf("5) Excluir Pessoa \n");
     printf("6) Encerrar programa\n");
 
@@ -136,8 +137,6 @@ void isFileOpen(readFile){
         printf("%s%s", ERRORFILE, RESET);
         exit(1);
     }
-    printf("%s", SUCCESSFILE);
-
     return;
 }
 
@@ -318,7 +317,7 @@ void registerPerson(){
     printf("Dia Nascimento: ");
     scanf("%d", &pw.DayBorn);
 
-    printf("Mês Nascimento: ");
+    printf("Mes Nascimento: ");
     scanf("%d", &pw.MonthBorn);
 
     printf("Ano Nascimento: ");
@@ -379,6 +378,7 @@ void registerPerson(){
 void consultPerson(){
     Person pr = {0};
     char cpf[16];
+    int cpfExists = 0;
 
     printf("-------------------- CONSULTA DE PESSOA --------------------\n");
     FILE *readFile = fopen("person.txt", "r");
@@ -395,6 +395,7 @@ void consultPerson(){
     pr.Cpf, pr.Name, pr.Sex, &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn, pr.City, pr.Uf) != EOF){
         if (strcmp(pr.Cpf, cpf) == 0)
         {
+            cpfExists = 1;
             printf("---- DADOS DE: %s ----\n", pr.Name);
             printf("---- CPF:               %s \n", pr.Cpf);
             printf("---- SEXO:              %s \n", pr.Sex);
@@ -405,6 +406,12 @@ void consultPerson(){
         }
         
     };
+
+    if (cpfExists == 0)
+    {
+        printf("%s", ERROR_CPF_NOT_EXISTS);
+    }
+    
 
     fclose(readFile);
 }
