@@ -131,9 +131,9 @@ int validateCpf(char cpf[])
     return 1;
 }
 
-void isFileOpen(readFile){
+void isFileOpen(file){
     // check if file has been succesfuly opened
-    if (!readFile)
+    if (!file)
     {
         printf("%s%s", ERRORFILE, RESET);
         exit(1);
@@ -298,8 +298,9 @@ void tranformStringToUpper(char *string){
 
 // CORE CODE FUNCTIONS
 void registerPerson(){
-    FILE *writeFile = fopen("person.txt", "a");
     Person pw = {0};
+    FILE *writeFile = fopen("person.txt", "a");
+    isFileOpen(writeFile);
     fflush(stdin);
 
     // Getting people`s data
