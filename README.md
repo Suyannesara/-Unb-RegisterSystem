@@ -26,7 +26,7 @@
 - [x] Registration of a person
 - [x] Consultation by CPF
 - [x] Consultation according to city
-- [x] Some validations of data like CPF, date, existing city/estate or not
+- [x] Some validations of data like CPF, date, existing city/state or not
 
 <br>
 <p>🤔 Any doubts or ideas? Feel free to get in touch with me: </p> - <a target="_blank" href="https://www.linkedin.com/in/suyanne-miranda/"> Linkedin </a> <p target="_blank"> - suyannesaramiranda@gmail.com </p> 
