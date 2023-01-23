@@ -16,7 +16,7 @@
 > <h4>In order to practice learnings in C language, I created this entire CRUD project. It is linked to the Algorithms and Code Language subject of FGA-UnB - 2022.2</h4> 
 <br>
 
-<h3 id="start-project">🏃🏻‍♀️Run on yout machine</h3>
+<h3 id="start-project">🏃🏻‍♀️Run on your machine</h3>
 
 > <h4>Just make sure to have a C compiler like GCC on your computer and to clone this repository, otherwise compile main.c file and the rest is gonna be done</h4> 
 <br>
