@@ -512,11 +512,44 @@ int calcAge(int yearBorn, int monthBorn){
 
     int age = (date.tm_year) - yearBorn;
 
-    if (monthBorn > date.tm_mon + 1)
-    {age--;}
+    if (monthBorn > date.tm_mon + 1){age--;}
     
     return age;
 }
+
+// int calcPercentByAge(int personAge, int totPeople){
+//     int et15, et16, et30, et50, et60 = 0;
+//     int p15, p16, p30, p50, p60 = 0;
+
+//     if (personAge <= 15)
+//     {
+//         et15++;
+//     }
+
+//     if (personAge >= 16 && personAge <= 29)
+//     {
+//         et16++;
+//     }
+
+//     if (personAge >= 30 && personAge <= 49)
+//     {
+//         et30++;
+//     }
+
+//     if (personAge >= 50 && personAge <= 60)
+//     {
+//         et50++;
+//     }
+
+//     if (personAge > 60)
+//     {
+//         et60++;
+//     }
+
+//     // CALC PERCENT
+//     p15 += (et15/totPeople) * 100;
+//     return p15;
+// }
 
 void generateReport(){
     Person personData;
@@ -524,6 +557,12 @@ void generateReport(){
     FILE *readFile = fopen("person.txt", "r");
     isFileOpen(readFile);
 
+    int registeredPeople = 0;
+    int personAge = 0;
+    int et15, et16, et30, et50, et60 = 0;
+    int p15, p16, p30, p50, p60 = 0;
+    
+    int percentPerAge, percentPerSex = 0;
 
     while(fscanf(readFile, 
     "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
@@ -535,9 +574,43 @@ void generateReport(){
     &personData.yearBorn, 
     personData.City, 
     personData.Uf) != EOF){
+        // CLASSIFY BY AGE
+        personAge  = calcAge(personData.yearBorn - 1900, personData.MonthBorn);
+        if (personAge <= 15)
+        {
+            et15++;
+        }
 
-        calcAge(personData.yearBorn - 1900, personData.MonthBorn);
+        if (personAge >= 16 && personAge <= 29)
+        {
+            et16++;
+            // printf("%d", et16);
+        }
+
+        if (personAge >= 30 && personAge <= 49)
+        {
+            et30++;
+        }
+
+        if (personAge >= 50 && personAge <= 60)
+        {
+            et50++;
+        }
+
+        if (personAge > 60)
+        {
+            et60++;
+        }
+
+        
+        // Count people on file
+        registeredPeople ++;
     }
+
+    // printf("%d", &et16);
+    p16 = ((float)et16/registeredPeople) * 100;
+
+    printf("%.2f%%", p16);
 
     fclose(readFile);
 }
