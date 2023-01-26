@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 // CREATE AND DEFINE VARIABLES VALUES
 #define LOCATIONS_LINES 5572
@@ -498,6 +499,44 @@ void listPeopleByCity(){
     for (j = 0; j < numberOfPeople; j++)
     {
         printf("\n%s   |   %s", listOfPeople[j].Cpf, listOfPeople[j].Name);
+    }
+
+    fclose(readFile);
+}
+
+
+int calcAge(int yearBorn, int monthBorn){
+    // Take actual date and time
+    time_t actualTime = time(NULL);
+    struct tm date = *localtime(&actualTime);
+
+    int age = (date.tm_year) - yearBorn;
+
+    if (monthBorn > date.tm_mon + 1)
+    {age--;}
+    
+    return age;
+}
+
+void generateReport(){
+    Person personData;
+
+    FILE *readFile = fopen("person.txt", "r");
+    isFileOpen(readFile);
+
+
+    while(fscanf(readFile, 
+    "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
+    personData.Cpf, 
+    personData.Name, 
+    personData.Sex, 
+    &personData.DayBorn, 
+    &personData.MonthBorn, 
+    &personData.yearBorn, 
+    personData.City, 
+    personData.Uf) != EOF){
+
+        calcAge(personData.yearBorn - 1900, personData.MonthBorn);
     }
 
     fclose(readFile);
