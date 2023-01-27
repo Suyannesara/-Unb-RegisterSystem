@@ -26,7 +26,7 @@ int main()
         listPeopleByCity();
         break;
     case 4:
-        printf("%s", LOADING_OPTION);
+        generateReport();
         break;
     case 5:
         printf("%s", LOADING_OPTION);

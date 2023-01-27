@@ -529,6 +529,7 @@ void generateReport(){
     int registeredPeople = 0;
     int personAge = 0;
     int et15 = 0, et16 = 0, et30 = 0, et50 = 0, et60 = 0;
+    int fem = 0, masc = 0;
     float p15 = 0, p16 = 0, p30 = 0, p50 = 0, p60 = 0;
     float pM = 0, pF = 0;
 
@@ -571,13 +572,23 @@ void generateReport(){
         }
 
         // DIVISION PER SEX
+
+        if (strcmp(personData.Sex, "F") == 0)
+        {
+            fem++;
+        }
+        if (strcmp(personData.Sex, "M") == 0)
+        {
+            masc++;
+        }
+        
         // Count people on file
         registeredPeople ++;
     }
 
     // PERCENTAGE PER AGE
     printf("%s\n", REPORT_INIT);
-    printf("TOTAL PESSOAS CADASTRADAS: %d\n", registeredPeople);
+    printf("TOTAL PESSOAS BENEFICIADAS: %d\n\n", registeredPeople);
 
     p15 = ((float)et15/registeredPeople) * 100;
     p16 = ((float)et16/registeredPeople) * 100;
@@ -585,7 +596,7 @@ void generateReport(){
     p50 = ((float)et50/registeredPeople) * 100;
     p60 = ((float)et60/registeredPeople) * 100;
 
-    printf("%s\n", PERCENT_BY_AGE);
+    printf("%s", PERCENT_BY_AGE);
 
     printf("0 a 15 : %.2f%%\n", p15);
     printf("16 a 29 : %.2f%%\n", p16);
@@ -594,11 +605,12 @@ void generateReport(){
     printf("60+ : %.2f%%\n", p60);
 
     // PERCENT PER SEX
-    printf("%s\n", PERCENT_BY_SEX);
+    printf("\n%s", PERCENT_BY_SEX);
     pM = ((float)masc/registeredPeople) * 100;
     pF = ((float)fem/registeredPeople) * 100;
 
-
+    printf("FEMININO: %.2f%%\n", pF);
+    printf("MASCULINO: %.2f%%\n", pM);
 
     fclose(readFile);
 }
