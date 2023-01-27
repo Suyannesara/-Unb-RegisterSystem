@@ -40,12 +40,15 @@ char ERROR_CPF_EXISTS[] = {"CPF ja cadastrado no sistema!\n"};
 char ERROR_CPF_NOT_EXISTS[] = {"CPF nao encontrado na base de dados\n"};
 char ERRORDATE[] = {"Data de nascimento invalida\n"};
 char ERRORFILE[] = {"Erro ao abrir a base de dados\n"};
-// char SUCCESSFILE[] = {"\nAbrindo base de dados . . .\n"};
 char ERRORSEX[] = {"O sexo digitado deve ser F ou M\n"};
 char ERROR_UF[] = {"UF inexistente\n"};
 char ERROR_CITY[] = {"CIDADE inexistente\n"};
 char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
 char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada!\n"};
+// OPTIONS INITIALIZATIONS
+char REPORT_INIT[] = {"------------------ APRESENTACAO RELATORIO ----------------\n"};
+char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
+char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
 
 
 // INIT CODE FUNCTION
@@ -517,40 +520,6 @@ int calcAge(int yearBorn, int monthBorn){
     return age;
 }
 
-// int calcPercentByAge(int personAge, int totPeople){
-//     int et15, et16, et30, et50, et60 = 0;
-//     int p15, p16, p30, p50, p60 = 0;
-
-//     if (personAge <= 15)
-//     {
-//         et15++;
-//     }
-
-//     if (personAge >= 16 && personAge <= 29)
-//     {
-//         et16++;
-//     }
-
-//     if (personAge >= 30 && personAge <= 49)
-//     {
-//         et30++;
-//     }
-
-//     if (personAge >= 50 && personAge <= 60)
-//     {
-//         et50++;
-//     }
-
-//     if (personAge > 60)
-//     {
-//         et60++;
-//     }
-
-//     // CALC PERCENT
-//     p15 += (et15/totPeople) * 100;
-//     return p15;
-// }
-
 void generateReport(){
     Person personData;
 
@@ -559,10 +528,9 @@ void generateReport(){
 
     int registeredPeople = 0;
     int personAge = 0;
-    int et15, et16, et30, et50, et60 = 0;
-    int p15, p16, p30, p50, p60 = 0;
-    
-    int percentPerAge, percentPerSex = 0;
+    int et15 = 0, et16 = 0, et30 = 0, et50 = 0, et60 = 0;
+    float p15 = 0, p16 = 0, p30 = 0, p50 = 0, p60 = 0;
+    float pM = 0, pF = 0;
 
     while(fscanf(readFile, 
     "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
@@ -578,39 +546,59 @@ void generateReport(){
         personAge  = calcAge(personData.yearBorn - 1900, personData.MonthBorn);
         if (personAge <= 15)
         {
-            et15++;
+            et15+=1;
         }
 
         if (personAge >= 16 && personAge <= 29)
         {
-            et16++;
+            et16+=1;
             // printf("%d", et16);
         }
 
         if (personAge >= 30 && personAge <= 49)
         {
-            et30++;
+            et30+=1;
         }
 
         if (personAge >= 50 && personAge <= 60)
         {
-            et50++;
+            et50+=1;
         }
 
         if (personAge > 60)
         {
-            et60++;
+            et60+=1;
         }
 
-        
+        // DIVISION PER SEX
         // Count people on file
         registeredPeople ++;
     }
 
-    // printf("%d", &et16);
-    p16 = ((float)et16/registeredPeople) * 100;
+    // PERCENTAGE PER AGE
+    printf("%s\n", REPORT_INIT);
+    printf("TOTAL PESSOAS CADASTRADAS: %d\n", registeredPeople);
 
-    printf("%.2f%%", p16);
+    p15 = ((float)et15/registeredPeople) * 100;
+    p16 = ((float)et16/registeredPeople) * 100;
+    p30 = ((float)et30/registeredPeople) * 100;
+    p50 = ((float)et50/registeredPeople) * 100;
+    p60 = ((float)et60/registeredPeople) * 100;
+
+    printf("%s\n", PERCENT_BY_AGE);
+
+    printf("0 a 15 : %.2f%%\n", p15);
+    printf("16 a 29 : %.2f%%\n", p16);
+    printf("30 a 49 : %.2f%%\n", p30);
+    printf("50 a 60 : %.2f%%\n", p50);
+    printf("60+ : %.2f%%\n", p60);
+
+    // PERCENT PER SEX
+    printf("%s\n", PERCENT_BY_SEX);
+    pM = ((float)masc/registeredPeople) * 100;
+    pF = ((float)fem/registeredPeople) * 100;
+
+
 
     fclose(readFile);
 }
