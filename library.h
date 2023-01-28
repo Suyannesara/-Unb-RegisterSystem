@@ -51,7 +51,7 @@ char REPORT_INIT[] = {"------------------ APRESENTACAO RELATORIO ---------------
 char REMOVE_INIT[] = {"----------- REMOCAO DE REGISTRO ---------"};
 char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
-char CONFIRM_EXCLUDE[] = {"Tem certeza de que deseja exclui-la do sistema?(S/N)\n"};
+char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistema?(S/N)\n"};
 
 
 // INIT CODE FUNCTION
@@ -648,6 +648,26 @@ void removeRecord(){
             fprintf(tempFile, "%02d/%02d/%02d\n", pRm.DayBorn, pRm.MonthBorn, pRm.yearBorn);
             fprintf(tempFile, "%s\n", pRm.City);
             fprintf(tempFile, "%s\n", pRm.Uf);
+        }else{
+            // In case of equal, ask for confirmation to exclude
+            printf("\n%s   |   %s\n", pRm.Cpf, pRm.Name);
+            printf("%s", CONFIRM_EXCLUDE);
+            fflush(stdin);
+            scanf("%[^\n]", confirm);
+            tranformStringToUpper(confirm);
+
+            // Verify input
+            if (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0)
+            {
+                printf("Opcao invalida, deve ser digitado S ou N\n");
+                printf("\n%s", RESET);
+                exit(1);
+            }
+       
+            if (strcmp(confirm, "N") == 0)
+            {
+                exit(1);
+            }
         }
 
     };
@@ -657,6 +677,6 @@ void removeRecord(){
 
     remove("person.txt");
     rename("personTemp.txt", "person.txt");
-    printf("%s", REMOVE_SUCCESS);
+    printf("\n%s", REMOVE_SUCCESS);
 
 }
