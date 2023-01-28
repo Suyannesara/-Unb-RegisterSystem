@@ -44,11 +44,14 @@ char ERRORSEX[] = {"O sexo digitado deve ser F ou M\n"};
 char ERROR_UF[] = {"UF inexistente\n"};
 char ERROR_CITY[] = {"CIDADE inexistente\n"};
 char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
+char REMOVE_SUCCESS[] = {"PESSOA REMOVIDA COM SUCESSO!\n"};
 char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada!\n"};
 // OPTIONS INITIALIZATIONS
 char REPORT_INIT[] = {"------------------ APRESENTACAO RELATORIO ----------------\n"};
+char REMOVE_INIT[] = {"----------- REMOCAO DE REGISTRO ---------"};
 char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
+char CONFIRM_EXCLUDE[] = {"Tem certeza de que deseja exclui-la do sistema?(S/N)\n"};
 
 
 // INIT CODE FUNCTION
@@ -613,4 +616,47 @@ void generateReport(){
     printf("MASCULINO: %.2f%%\n", pM);
 
     fclose(readFile);
+}
+
+void removeRecord(){
+    Person pRm;
+    char cpf[16];
+    char confirm[2];
+
+    printf("%s\n", REMOVE_INIT);
+    FILE *primaryFile = fopen("person.txt", "r");
+    FILE *tempFile = fopen("personTemp.txt", "ab");
+
+    isFileOpen(primaryFile);
+    isFileOpen(tempFile);
+
+    printf("Digite o CPF da pessoa para exclusao: ");
+    fflush(stdin);
+    fgets(cpf, 12, stdin);
+    cpf[strcspn(cpf, "\n")] = '\0';
+
+
+    // WRITING ON TEMPORARY FILE
+    while(fscanf(primaryFile, 
+    "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
+    pRm.Cpf, pRm.Name, pRm.Sex, &pRm.DayBorn, &pRm.MonthBorn, &pRm.yearBorn, pRm.City, pRm.Uf) != EOF){
+        if (strcmp(pRm.Cpf, cpf) != 0)
+        {
+            fprintf(tempFile, "%s\n", pRm.Cpf);
+            fprintf(tempFile, "%s\n", pRm.Name);
+            fprintf(tempFile, "%s\n", pRm.Sex);
+            fprintf(tempFile, "%02d/%02d/%02d\n", pRm.DayBorn, pRm.MonthBorn, pRm.yearBorn);
+            fprintf(tempFile, "%s\n", pRm.City);
+            fprintf(tempFile, "%s\n", pRm.Uf);
+        }
+
+    };
+
+    fclose(primaryFile);
+    fclose(tempFile);
+
+    remove("person.txt");
+    rename("personTemp.txt", "person.txt");
+    printf("%s", REMOVE_SUCCESS);
+
 }

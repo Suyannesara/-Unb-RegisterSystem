@@ -10,7 +10,8 @@ char INIT_APP[] = {"\n-------------------------- ATENCAO -----------------------
 int main()
 {
     printf("%s", INIT_APP);
-    scanf("%[^\n]s");
+    char whiteSpace[2];
+    scanf("%[^\n]s", whiteSpace);
     printf("\n\n");
     menuOption = executeMenu();
     // Execute each function according to option
@@ -29,7 +30,7 @@ int main()
         generateReport();
         break;
     case 5:
-        printf("%s", LOADING_OPTION);
+        removeRecord();
     case 6:
         printf("%s", FINISH_PROGRAM);
         break;
