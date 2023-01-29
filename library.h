@@ -304,6 +304,18 @@ void tranformStringToUpper(char *string){
     }
 }
 
+int calcAge(int yearBorn, int monthBorn){
+    // Take actual date and time
+    time_t actualTime = time(NULL);
+    struct tm date = *localtime(&actualTime);
+
+    int age = (date.tm_year) - yearBorn;
+
+    if (monthBorn > date.tm_mon + 1){age--;}
+    
+    return age;
+}
+
 // CORE CODE FUNCTIONS
 void registerPerson(){
     Person pw = {0};
@@ -445,7 +457,6 @@ void consultPerson(){
     fclose(readFile);
 }
 
-
 void listPeopleByCity(){
     int j = 0;
     int numberOfPeople = 0;
@@ -512,19 +523,6 @@ void listPeopleByCity(){
     }
 
     fclose(readFile);
-}
-
-
-int calcAge(int yearBorn, int monthBorn){
-    // Take actual date and time
-    time_t actualTime = time(NULL);
-    struct tm date = *localtime(&actualTime);
-
-    int age = (date.tm_year) - yearBorn;
-
-    if (monthBorn > date.tm_mon + 1){age--;}
-    
-    return age;
 }
 
 void generateReport(){
