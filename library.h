@@ -209,7 +209,7 @@ int checkIfInputIsValid(char input[], int maxChar){
     return 1;
 }
 
-void checkIfCpfIsRegistered(char cpf[]){
+int checkIfCpfIsRegistered(char cpf[]){
     FILE *readFile = fopen("person.txt", "r");
     isFileOpen(readFile);
 
@@ -229,11 +229,12 @@ void checkIfCpfIsRegistered(char cpf[]){
 
             if (strcmp(cpf, personData.Cpf) == 0)
             {
-                printf("%s%s", ERROR_CPF_EXISTS, RESET);
-                exit(1);
+                return 1;
             }
             
         }
+
+    return 0;
 }
 
 int checkIfLocationExists(char userInput[], int locationType){
@@ -321,7 +322,10 @@ void registerPerson(){
         printf("\n%s%s", ERRORCPF,RESET);
         exit(1);
     }
-    checkIfCpfIsRegistered(pw.Cpf);
+    if(checkIfCpfIsRegistered(pw.Cpf) == 1){
+        printf("%s%s", ERROR_CPF_EXISTS, RESET);
+        exit(1);
+    };
     
     printf("Nome: ");
     scanf("%[^\n]s", pw.Name);
@@ -633,8 +637,18 @@ void removeRecord(){
     printf("Digite o CPF da pessoa para exclusao: ");
     fflush(stdin);
     fgets(cpf, 12, stdin);
-    cpf[strcspn(cpf, "\n")] = '\0';
 
+    isCpfValid = validateCpf(cpf);
+    if (isCpfValid == 0)
+    {
+        printf("\n%s%s", ERRORCPF,RESET);
+        exit(1);
+    }
+
+    if(checkIfCpfIsRegistered(cpf) == 0){
+        printf("\n%s", ERROR_CPF_NOT_EXISTS);
+        exit(1);
+    };
 
     // WRITING ON TEMPORARY FILE
     while(fscanf(primaryFile, 
