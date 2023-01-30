@@ -379,69 +379,68 @@ void registerPerson()
         scanf("%[^\n]s", pw.Name);
         tranformStringToUpper(&pw.Name);
         isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
-        // if (isInputValid != 1)
-        // {
-        //     continue;
-        // }
     } while (isInputValid != 1);
 
-    printf("Sexo (F - Feminino, M - Masculino): ");
-    scanf("%s", pw.Sex);
-    tranformStringToUpper(&pw.Sex);
-    if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0)
+    do
     {
-        printf("%s%s", ERRORSEX, RESET);
-        exit(1);
-    }
+        printf("Sexo (F - Feminino, M - Masculino): ");
+        fflush(stdin);
+        scanf("%s", pw.Sex);
+        tranformStringToUpper(&pw.Sex);
+        if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0)
+        {
+            printf("%s", ERRORSEX);
+        }
+    } while (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0);
 
-    printf("Dia Nascimento: ");
-    scanf("%d", &pw.DayBorn);
+   do
+   {
+        printf("Dia Nascimento: ");
+        scanf("%d", &pw.DayBorn);
 
-    printf("Mes Nascimento: ");
-    scanf("%d", &pw.MonthBorn);
+        printf("Mes Nascimento: ");
+        scanf("%d", &pw.MonthBorn);
 
-    printf("Ano Nascimento: ");
-    scanf("%d", &pw.yearBorn);
-    isDateValid = checkIfDateValid(pw.DayBorn, pw.MonthBorn, pw.yearBorn);
-    if (isDateValid != 1)
+        printf("Ano Nascimento: ");
+        scanf("%d", &pw.yearBorn);
+        isDateValid = checkIfDateValid(pw.DayBorn, pw.MonthBorn, pw.yearBorn);
+        if (isDateValid != 1)
+        {
+            printf("%s", ERRORDATE);
+        }
+   } while (isDateValid != 1);
+   
+    do
     {
-        printf("%s%s", ERRORDATE, RESET);
-        exit(1);
-    }
+        fflush(stdin);
+        printf("Cidade: ");
+        fgets(pw.City, sizeof(pw.City), stdin);
+        pw.City[strcspn(pw.City, "\n")] = '\0';
+        tranformStringToUpper(&pw.City);
+        isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
 
-    fflush(stdin);
-
-    printf("Cidade: ");
-    fgets(pw.City, sizeof(pw.City), stdin);
-    pw.City[strcspn(pw.City, "\n")] = '\0';
-    tranformStringToUpper(&pw.City);
-    isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
-    if (isInputValid != 1)
+        if (checkIfLocationExists(pw.City, 0) == 0)
+        {
+            printf("%s", ERROR_CITY);
+        }
+    } while (isInputValid != 1 || checkIfLocationExists(pw.City, 0) == 0);
+    
+    do
     {
-        exit(1);
-    }
+        printf("UF/Estado: ");
+        // Verify if USER UF has only 2 digits
+        fflush(stdin);
+        scanf("%s", pw.Uf);
+        tranformStringToUpper(&pw.Uf);
+        isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
 
-    if (checkIfLocationExists(pw.City, 0) == 0)
-    {
-        printf("%s%s", ERROR_CITY, RESET);
-        exit(1);
-    }
+        if (checkIfLocationExists(pw.Uf, 1) == 0)
+        {
+            printf("%s", ERROR_UF);
+        }
+    } while (isInputValid != 1 || checkIfLocationExists(pw.Uf, 1) == 0);
+    
 
-    printf("UF/Estado: ");
-    // Verify if USER UF has only 2 digits
-    scanf("%s", pw.Uf);
-    tranformStringToUpper(&pw.Uf);
-    isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
-    if (isInputValid != 1)
-    {
-        exit(1);
-    }
-
-    if (checkIfLocationExists(pw.Uf, 1) == 0)
-    {
-        printf("%s%s", ERROR_UF, RESET);
-        exit(1);
-    }
 
     fflush(stdin);
 
