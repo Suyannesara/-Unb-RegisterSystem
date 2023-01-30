@@ -8,7 +8,8 @@
 #define N_CPF_DIGITS 11
 #define MAX_DAYS_IN_MONTH 31
 
-typedef struct {
+typedef struct
+{
     char Cpf[16];
     char Name[120];
     char Sex[2];
@@ -23,15 +24,15 @@ typedef struct
 {
     char Uf[3];
     char Name[120];
-    
+
 } Locations;
 
 int i = 0;
-int isCpfValid, 
-isInputValid, 
-isDateValid, 
-ufExists, 
-isElementPresentInGroup = 0;
+int isCpfValid,
+    isInputValid,
+    isDateValid,
+    ufExists,
+    isElementPresentInGroup = 0;
 
 // MESSAGES
 char RESET[] = {"\n------------- REINICIANDO O SISTEMA ------------"};
@@ -53,9 +54,9 @@ char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
 char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistema?(S/N)\n"};
 
-
 // INIT CODE FUNCTION
-int executeMenu() {
+int executeMenu()
+{
     int option;
     printf("Escolha uma das opcoes a seguir: \n");
     printf("1) Cadastrar Pessoa \n");
@@ -94,12 +95,15 @@ int validateCpf(char cpf[])
     }
 
     // Check if CPF inputed is composed of the SAME NUMBER. Eg: 000000000000
-    for (i = 1; i < 11; i++) {
-        if (cpfDigits[i] != cpfDigits[0]) {
+    for (i = 1; i < 11; i++)
+    {
+        if (cpfDigits[i] != cpfDigits[0])
+        {
             break;
         }
     }
-    if (i == N_CPF_DIGITS) {
+    if (i == N_CPF_DIGITS)
+    {
         return 0;
     }
 
@@ -138,7 +142,8 @@ int validateCpf(char cpf[])
     return 1;
 }
 
-void isFileOpen(file){
+void isFileOpen(file)
+{
     // check if file has been succesfuly opened
     if (!file)
     {
@@ -148,60 +153,72 @@ void isFileOpen(file){
     return;
 }
 
-int checkIfDateValid(int d, int m, int y){
+int checkIfDateValid(int d, int m, int y)
+{
     int leapYear = 0;
     int monthMaxDays = MAX_DAYS_IN_MONTH;
 
-    if (y < 0) {
+    if (y < 0)
+    {
         return 0;
     };
 
-    if (m < 1 || m > 12) {
+    if (m < 1 || m > 12)
+    {
         return 0;
     };
 
-    if (d < 1) {
+    if (d < 1)
+    {
         return 0;
     };
 
-
-    if (m == 2) {
-        if((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)){
+    if (m == 2)
+    {
+        if ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0))
+        {
             leapYear = 1;
         };
 
-        if (leapYear == 1) {
+        if (leapYear == 1)
+        {
             monthMaxDays = 29;
-        } else {
+        }
+        else
+        {
             monthMaxDays = 28;
         };
-
-    } else if (m == 4 || m == 6 || m == 9 || m == 11) {
+    }
+    else if (m == 4 || m == 6 || m == 9 || m == 11)
+    {
         monthMaxDays = 30;
     };
 
-    if (d > monthMaxDays) {
+    if (d > monthMaxDays)
+    {
         return 0;
     };
 
     return 1;
 }
 
-int checkIfInputIsValid(char input[], int maxChar){  
+int checkIfInputIsValid(char input[], int maxChar)
+{
     int inputLen = strlen(input);
 
     // Check if maximum length is attendend
     if (inputLen > maxChar || (inputLen == 0))
     {
-        printf("Voce ultrapassou o limite de caracteres para esse campo!\n %s", RESET);
+        printf("Voce ultrapassou o limite de caracteres para esse campo!\n");
         return 0;
     }
 
     // issspace - check if it is a blank space
-    for (int i=0; i < inputLen; i++) {
-        if(!(input[i] >= 'A' && input[i] <= 'Z' || input[i] == ' '))
+    for (int i = 0; i < inputLen; i++)
+    {
+        if (!(input[i] >= 'A' && input[i] <= 'Z' || input[i] == ' '))
         {
-            printf("Os inputs conter apenas letras ou espaços!\n %s", RESET);
+            printf("Os inputs conter apenas letras ou espacos!\n ");
             return 0;
         }
     }
@@ -209,35 +226,37 @@ int checkIfInputIsValid(char input[], int maxChar){
     return 1;
 }
 
-int checkIfCpfIsRegistered(char cpf[]){
+int checkIfCpfIsRegistered(char cpf[])
+{
     FILE *readFile = fopen("person.txt", "r");
     isFileOpen(readFile);
 
     Person personData;
 
     // Read data
-    while(fscanf(readFile, 
-        "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
-        personData.Cpf, 
-        personData.Name, 
-        personData.Sex, 
-        &personData.DayBorn, 
-        &personData.MonthBorn, 
-        &personData.yearBorn, 
-        personData.City, 
-        personData.Uf) != EOF){
+    while (fscanf(readFile,
+                  "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
+                  personData.Cpf,
+                  personData.Name,
+                  personData.Sex,
+                  &personData.DayBorn,
+                  &personData.MonthBorn,
+                  &personData.yearBorn,
+                  personData.City,
+                  personData.Uf) != EOF)
+    {
 
-            if (strcmp(cpf, personData.Cpf) == 0)
-            {
-                return 1;
-            }
-            
+        if (strcmp(cpf, personData.Cpf) == 0)
+        {
+            return 1;
         }
+    }
 
     return 0;
 }
 
-int checkIfLocationExists(char userInput[], int locationType){
+int checkIfLocationExists(char userInput[], int locationType)
+{
 
     int size = 0;
     char locationLine[LOCATIONS_LINES];
@@ -251,49 +270,55 @@ int checkIfLocationExists(char userInput[], int locationType){
     {
         size = 0;
         // VERRIFY UF
-        while (fgets(locationLine, sizeof(locationLine), fp2)) {
+        while (fgets(locationLine, sizeof(locationLine), fp2))
+        {
             ufToken = strtok(locationLine, ",");
             ufToken = strtok(NULL, ",");
 
             // Verify if TOKEN == INPUT - If so, UF EXISTS
-            if(strcmp(userInput, ufToken) == 0){
+            if (strcmp(userInput, ufToken) == 0)
+            {
                 return 1;
             }
             size++;
         }
     }
-       
+
     if (locationType == 0)
     {
         // VERIFY CITY
-        while (fgets(locationLine, sizeof(locationLine), fp2)) {
+        while (fgets(locationLine, sizeof(locationLine), fp2))
+        {
             cityTokenNoAccent = strtok(locationLine, ",");
             cityTokenNoAccent = strtok(NULL, ","); // Receive second line
             cityTokenNoAccent = strtok(NULL, ","); // Receive third line
             cityTokenNoAccent = strtok(NULL, ","); // Receive forth file line
 
             // Verify if TOKEN == INPUT - If so, CITY EXISTS
-            if(strcmp(userInput, cityTokenNoAccent) == 0){
+            if (strcmp(userInput, cityTokenNoAccent) == 0)
+            {
                 return 1;
             }
             size++;
         }
     }
-    
+
     // Close the file
     fclose(fp2);
 
     return 0;
 }
 
-int orderPeopleInAlphabet(const void *p1, const void *p2){
+int orderPeopleInAlphabet(const void *p1, const void *p2)
+{
     Person *pa = (Person *)p1;
     Person *pb = (Person *)p2;
     return strcmp(pa->Name, pb->Name);
 }
 
 // Using reference to upperString
-void tranformStringToUpper(char *string){
+void tranformStringToUpper(char *string)
+{
     char caracter;
     int i;
 
@@ -304,20 +329,25 @@ void tranformStringToUpper(char *string){
     }
 }
 
-int calcAge(int yearBorn, int monthBorn){
+int calcAge(int yearBorn, int monthBorn)
+{
     // Take actual date and time
     time_t actualTime = time(NULL);
     struct tm date = *localtime(&actualTime);
 
     int age = (date.tm_year) - yearBorn;
 
-    if (monthBorn > date.tm_mon + 1){age--;}
-    
+    if (monthBorn > date.tm_mon + 1)
+    {
+        age--;
+    }
+
     return age;
 }
 
 // CORE CODE FUNCTIONS
-void registerPerson(){
+void registerPerson()
+{
     Person pw = {0};
     FILE *writeFile = fopen("person.txt", "a");
     isFileOpen(writeFile);
@@ -325,30 +355,41 @@ void registerPerson(){
 
     // Getting people`s data
     printf("-------------------- REGISTRO DE PESSOA --------------------\n");
-    printf("CPF: ");
-    fgets(pw.Cpf, 15, stdin);
-    pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
-    isCpfValid = validateCpf(pw.Cpf);
-    if (isCpfValid == 0)
+    do
     {
-        printf("\n%s%s", ERRORCPF,RESET);
-        exit(1);
-    }
-    if(checkIfCpfIsRegistered(pw.Cpf) == 1){
-        printf("%s%s", ERROR_CPF_EXISTS, RESET);
-        exit(1);
-    };
-    
-    printf("Nome: ");
-    scanf("%[^\n]s", pw.Name);
-    tranformStringToUpper(&pw.Name);
-    isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
-    if (isInputValid != 1){exit(1);}
+        printf("CPF: ");
+        fgets(pw.Cpf, 15, stdin);
+        pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
+        if (validateCpf(pw.Cpf) == 0)
+        {
+            printf("\n%s%s", ERRORCPF);
+            continue;
+        }
+        if (checkIfCpfIsRegistered(pw.Cpf) == 1)
+        {
+            printf("%s", ERROR_CPF_EXISTS);
+            continue;
+        }
+    } while (validateCpf(pw.Cpf) == 0 || checkIfCpfIsRegistered(pw.Cpf) == 1);
+
+    do
+    {
+        printf("Nome: ");
+        fflush(stdin);
+        scanf("%[^\n]s", pw.Name);
+        tranformStringToUpper(&pw.Name);
+        isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
+        // if (isInputValid != 1)
+        // {
+        //     continue;
+        // }
+    } while (isInputValid != 1);
 
     printf("Sexo (F - Feminino, M - Masculino): ");
     scanf("%s", pw.Sex);
     tranformStringToUpper(&pw.Sex);
-    if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0){
+    if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0)
+    {
         printf("%s%s", ERRORSEX, RESET);
         exit(1);
     }
@@ -367,7 +408,7 @@ void registerPerson(){
         printf("%s%s", ERRORDATE, RESET);
         exit(1);
     }
-    
+
     fflush(stdin);
 
     printf("Cidade: ");
@@ -375,9 +416,13 @@ void registerPerson(){
     pw.City[strcspn(pw.City, "\n")] = '\0';
     tranformStringToUpper(&pw.City);
     isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
-    if (isInputValid != 1){exit(1);}
+    if (isInputValid != 1)
+    {
+        exit(1);
+    }
 
-    if(checkIfLocationExists(pw.City, 0) == 0){
+    if (checkIfLocationExists(pw.City, 0) == 0)
+    {
         printf("%s%s", ERROR_CITY, RESET);
         exit(1);
     }
@@ -387,9 +432,13 @@ void registerPerson(){
     scanf("%s", pw.Uf);
     tranformStringToUpper(&pw.Uf);
     isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
-    if (isInputValid != 1){exit(1);}
+    if (isInputValid != 1)
+    {
+        exit(1);
+    }
 
-    if(checkIfLocationExists(pw.Uf, 1) == 0){
+    if (checkIfLocationExists(pw.Uf, 1) == 0)
+    {
         printf("%s%s", ERROR_UF, RESET);
         exit(1);
     }
@@ -402,8 +451,8 @@ void registerPerson(){
         printf("%s%s", ERRORFILE, RESET);
         exit(1);
     }
-    
-    //FILE - If it was ok - print on file
+
+    // FILE - If it was ok - print on file
     fprintf(writeFile, "%s\n", pw.Cpf);
     fprintf(writeFile, "%s\n", pw.Name);
     fprintf(writeFile, "%s\n", pw.Sex);
@@ -416,7 +465,8 @@ void registerPerson(){
     fclose(writeFile);
 }
 
-void consultPerson(){
+void consultPerson()
+{
     Person pr = {0};
     char cpf[16];
     int cpfExists = 0;
@@ -431,9 +481,10 @@ void consultPerson(){
     fgets(cpf, 12, stdin);
     cpf[strcspn(cpf, "\n")] = '\0';
 
-    while(fscanf(readFile, 
-    "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
-    pr.Cpf, pr.Name, pr.Sex, &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn, pr.City, pr.Uf) != EOF){
+    while (fscanf(readFile,
+                  "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
+                  pr.Cpf, pr.Name, pr.Sex, &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn, pr.City, pr.Uf) != EOF)
+    {
         if (strcmp(pr.Cpf, cpf) == 0)
         {
             cpfExists = 1;
@@ -445,19 +496,18 @@ void consultPerson(){
             printf("---- ESTADO/UF          %s \n", pr.Uf);
             exit(1);
         }
-        
     };
 
     if (cpfExists == 0)
     {
         printf("%s", ERROR_CPF_NOT_EXISTS);
     }
-    
 
     fclose(readFile);
 }
 
-void listPeopleByCity(){
+void listPeopleByCity()
+{
     int j = 0;
     int numberOfPeople = 0;
     int hasSomeoneInCity = 0;
@@ -480,24 +530,25 @@ void listPeopleByCity(){
     isInputValid = checkIfInputIsValid(city.Name, sizeof(city.Name));
 
     // Check if input is valid // Check if city Name exists
-    if ((isInputValid != 1) || checkIfLocationExists(city.Name, 0) != 1){
+    if ((isInputValid != 1) || checkIfLocationExists(city.Name, 0) != 1)
+    {
         printf("%s\n", RESET);
         exit(1);
     }
-    
 
     // Search on person file. Compare each city line with Name, see the ones that are compatible and insert in a array;
     // Read each line on file
-    while(fscanf(readFile, 
-        "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
-        personByCityStruct.Cpf, 
-        personByCityStruct.Name, 
-        personByCityStruct.Sex, 
-        &personByCityStruct.DayBorn, 
-        &personByCityStruct.MonthBorn, 
-        &personByCityStruct.yearBorn, 
-        personByCityStruct.City, 
-        personByCityStruct.Uf) != EOF){
+    while (fscanf(readFile,
+                  "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
+                  personByCityStruct.Cpf,
+                  personByCityStruct.Name,
+                  personByCityStruct.Sex,
+                  &personByCityStruct.DayBorn,
+                  &personByCityStruct.MonthBorn,
+                  &personByCityStruct.yearBorn,
+                  personByCityStruct.City,
+                  personByCityStruct.Uf) != EOF)
+    {
 
         if (strcmp(city.Name, personByCityStruct.City) == 0)
         {
@@ -512,7 +563,6 @@ void listPeopleByCity(){
         printf("%s", ERROR_NOBODY_IN_CITY);
         exit(1);
     }
-    
 
     // Sort people by name from A to Z
     qsort(listOfPeople, numberOfPeople, sizeof(Person), orderPeopleInAlphabet);
@@ -525,7 +575,8 @@ void listPeopleByCity(){
     fclose(readFile);
 }
 
-void generateReport(){
+void generateReport()
+{
     Person personData;
 
     FILE *readFile = fopen("person.txt", "r");
@@ -538,42 +589,43 @@ void generateReport(){
     float p15 = 0, p16 = 0, p30 = 0, p50 = 0, p60 = 0;
     float pM = 0, pF = 0;
 
-    while(fscanf(readFile, 
-    "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
-    personData.Cpf, 
-    personData.Name, 
-    personData.Sex, 
-    &personData.DayBorn, 
-    &personData.MonthBorn, 
-    &personData.yearBorn, 
-    personData.City, 
-    personData.Uf) != EOF){
+    while (fscanf(readFile,
+                  "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
+                  personData.Cpf,
+                  personData.Name,
+                  personData.Sex,
+                  &personData.DayBorn,
+                  &personData.MonthBorn,
+                  &personData.yearBorn,
+                  personData.City,
+                  personData.Uf) != EOF)
+    {
         // CLASSIFY BY AGE
-        personAge  = calcAge(personData.yearBorn - 1900, personData.MonthBorn);
+        personAge = calcAge(personData.yearBorn - 1900, personData.MonthBorn);
         if (personAge <= 15)
         {
-            et15+=1;
+            et15 += 1;
         }
 
         if (personAge >= 16 && personAge <= 29)
         {
-            et16+=1;
+            et16 += 1;
             // printf("%d", et16);
         }
 
         if (personAge >= 30 && personAge <= 49)
         {
-            et30+=1;
+            et30 += 1;
         }
 
         if (personAge >= 50 && personAge <= 60)
         {
-            et50+=1;
+            et50 += 1;
         }
 
         if (personAge > 60)
         {
-            et60+=1;
+            et60 += 1;
         }
 
         // DIVISION PER SEX
@@ -586,20 +638,20 @@ void generateReport(){
         {
             masc++;
         }
-        
+
         // Count people on file
-        registeredPeople ++;
+        registeredPeople++;
     }
 
     // PERCENTAGE PER AGE
     printf("%s\n", REPORT_INIT);
     printf("TOTAL PESSOAS BENEFICIADAS: %d\n\n", registeredPeople);
 
-    p15 = ((float)et15/registeredPeople) * 100;
-    p16 = ((float)et16/registeredPeople) * 100;
-    p30 = ((float)et30/registeredPeople) * 100;
-    p50 = ((float)et50/registeredPeople) * 100;
-    p60 = ((float)et60/registeredPeople) * 100;
+    p15 = ((float)et15 / registeredPeople) * 100;
+    p16 = ((float)et16 / registeredPeople) * 100;
+    p30 = ((float)et30 / registeredPeople) * 100;
+    p50 = ((float)et50 / registeredPeople) * 100;
+    p60 = ((float)et60 / registeredPeople) * 100;
 
     printf("%s", PERCENT_BY_AGE);
 
@@ -611,8 +663,8 @@ void generateReport(){
 
     // PERCENT PER SEX
     printf("\n%s", PERCENT_BY_SEX);
-    pM = ((float)masc/registeredPeople) * 100;
-    pF = ((float)fem/registeredPeople) * 100;
+    pM = ((float)masc / registeredPeople) * 100;
+    pF = ((float)fem / registeredPeople) * 100;
 
     printf("FEMININO: %.2f%%\n", pF);
     printf("MASCULINO: %.2f%%\n", pM);
@@ -620,7 +672,8 @@ void generateReport(){
     fclose(readFile);
 }
 
-void removeRecord(){
+void removeRecord()
+{
     Person pRm;
     char cpf[16];
     char confirm[2];
@@ -639,19 +692,21 @@ void removeRecord(){
     isCpfValid = validateCpf(cpf);
     if (isCpfValid == 0)
     {
-        printf("\n%s%s", ERRORCPF,RESET);
+        printf("\n%s%s", ERRORCPF, RESET);
         exit(1);
     }
 
-    if(checkIfCpfIsRegistered(cpf) == 0){
+    if (checkIfCpfIsRegistered(cpf) == 0)
+    {
         printf("\n%s", ERROR_CPF_NOT_EXISTS);
         exit(1);
     };
 
     // WRITING ON TEMPORARY FILE
-    while(fscanf(primaryFile, 
-    "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]", 
-    pRm.Cpf, pRm.Name, pRm.Sex, &pRm.DayBorn, &pRm.MonthBorn, &pRm.yearBorn, pRm.City, pRm.Uf) != EOF){
+    while (fscanf(primaryFile,
+                  "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
+                  pRm.Cpf, pRm.Name, pRm.Sex, &pRm.DayBorn, &pRm.MonthBorn, &pRm.yearBorn, pRm.City, pRm.Uf) != EOF)
+    {
         if (strcmp(pRm.Cpf, cpf) != 0)
         {
             fprintf(tempFile, "%s\n", pRm.Cpf);
@@ -660,7 +715,9 @@ void removeRecord(){
             fprintf(tempFile, "%02d/%02d/%02d\n", pRm.DayBorn, pRm.MonthBorn, pRm.yearBorn);
             fprintf(tempFile, "%s\n", pRm.City);
             fprintf(tempFile, "%s\n", pRm.Uf);
-        }else{
+        }
+        else
+        {
             // In case of equal, ask for confirmation to exclude
             printf("\n%s   |   %s\n", pRm.Cpf, pRm.Name);
             printf("%s", CONFIRM_EXCLUDE);
@@ -675,13 +732,12 @@ void removeRecord(){
                 printf("\n%s", RESET);
                 exit(1);
             }
-       
+
             if (strcmp(confirm, "N") == 0)
             {
                 exit(1);
             }
         }
-
     };
 
     fclose(primaryFile);
@@ -690,5 +746,4 @@ void removeRecord(){
     remove("person.txt");
     rename("personTemp.txt", "person.txt");
     printf("\n%s", REMOVE_SUCCESS);
-
 }
