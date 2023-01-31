@@ -475,10 +475,23 @@ void consultPerson()
 
     isFileOpen(readFile);
 
-    printf("Digite o CPF para consulta: ");
-    fflush(stdin);
-    fgets(cpf, 12, stdin);
-    cpf[strcspn(cpf, "\n")] = '\0';
+    do
+    {
+        printf("Digite o CPF para consulta: ");
+        fflush(stdin);
+        fgets(cpf, 12, stdin);
+        cpf[strcspn(cpf, "\n")] = '\0';
+        if (validateCpf(cpf) == 0)
+        {
+            printf("\n%s%s", ERRORCPF);
+            continue;
+        }
+        if (checkIfCpfIsRegistered(cpf) == 1)
+        {
+            printf("%s", ERROR_CPF_EXISTS);
+            continue;
+        }
+    } while (validateCpf(cpf) == 0 || checkIfCpfIsRegistered(cpf) == 1);
 
     while (fscanf(readFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
@@ -518,23 +531,21 @@ void listPeopleByCity()
     FILE *readFile = fopen("person.txt", "r");
     isFileOpen(readFile);
 
-    printf("Busque pelo nome da cidade: ");
-    fflush(stdin);
 
     Locations city;
     // Receive input
-    fgets(city.Name, sizeof(city.Name), stdin);
-    city.Name[strcspn(city.Name, "\n")] = '\0';
-    tranformStringToUpper(&city.Name);
-    isInputValid = checkIfInputIsValid(city.Name, sizeof(city.Name));
 
-    // Check if input is valid // Check if city Name exists
-    if ((isInputValid != 1) || checkIfLocationExists(city.Name, 0) != 1)
+    do
     {
-        printf("%s\n", RESET);
-        exit(1);
-    }
+        printf("Busque pelo nome da cidade: ");
+        fflush(stdin);
+        fgets(city.Name, sizeof(city.Name), stdin);
+        city.Name[strcspn(city.Name, "\n")] = '\0';
+        tranformStringToUpper(&city.Name);
+        // Check if city Name exists
 
+    } while (checkIfLocationExists(city.Name, 0) != 1);
+    
     // Search on person file. Compare each city line with Name, see the ones that are compatible and insert in a array;
     // Read each line on file
     while (fscanf(readFile,
@@ -551,16 +562,16 @@ void listPeopleByCity()
 
         if (strcmp(city.Name, personByCityStruct.City) == 0)
         {
-            int hasSomeoneInCity = 1;
+            hasSomeoneInCity = 1;
             listOfPeople[numberOfPeople] = personByCityStruct;
             numberOfPeople++;
         }
     }
 
+    
     if (hasSomeoneInCity == 0)
     {
         printf("%s", ERROR_NOBODY_IN_CITY);
-        exit(1);
     }
 
     // Sort people by name from A to Z
@@ -684,22 +695,25 @@ void removeRecord()
     isFileOpen(primaryFile);
     isFileOpen(tempFile);
 
-    printf("Digite o CPF da pessoa para exclusao: ");
-    fflush(stdin);
-    fgets(cpf, 12, stdin);
+   ;
 
-    isCpfValid = validateCpf(cpf);
-    if (isCpfValid == 0)
+    do
     {
-        printf("\n%s%s", ERRORCPF, RESET);
-        exit(1);
-    }
-
-    if (checkIfCpfIsRegistered(cpf) == 0)
-    {
-        printf("\n%s", ERROR_CPF_NOT_EXISTS);
-        exit(1);
-    };
+        printf("Digite o CPF da pessoa para exclusao: ");
+        fflush(stdin);
+        fgets(cpf, 12, stdin);
+        cpf[strcspn(cpf, "\n")] = '\0';
+        if (validateCpf(cpf) == 0)
+        {
+            printf("\n%s%s", ERRORCPF);
+            continue;
+        }
+        if (checkIfCpfIsRegistered(cpf) == 1)
+        {
+            printf("%s", ERROR_CPF_EXISTS);
+            continue;
+        }
+    } while (validateCpf(cpf) == 0 || checkIfCpfIsRegistered(cpf) == 1);
 
     // WRITING ON TEMPORARY FILE
     while (fscanf(primaryFile,
