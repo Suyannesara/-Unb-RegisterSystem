@@ -13,33 +13,38 @@ int main()
     char whiteSpace[2];
     scanf("%[^\n]s", whiteSpace);
     printf("\n\n");
-    menuOption = executeMenu();
-    // Execute each function according to option
-    switch (menuOption)
+    int menuOption;
+    while (1)
     {
-    case 1:
-        registerPerson();
-        break;
-    case 2:
-        consultPerson();
-        break;
-    case 3:
-        listPeopleByCity();
-        break;
-    case 4:
-        generateReport();
-        break;
-    case 5:
-        removeRecord();
-    case 6:
-        printf("%s", FINISH_PROGRAM);
-        break;
-    default:
-        printf("%s", INVALID_OPTION);
-        break;
+        menuOption = executeMenu();
+        if (menuOption == 6)
+        {
+            printf("%s", FINISH_PROGRAM);
+            break;
+        }
+        switch (menuOption)
+        {
+        case 1:
+            registerPerson();
+            break;
+        case 2:
+            consultPerson();
+            break;
+        case 3:
+            listPeopleByCity();
+            break;
+        case 4:
+            generateReport();
+            break;
+        case 5:
+            removeRecord();
+            break;
+        default:
+            printf("%s", INVALID_OPTION);
+            break;
+        }
     }
 
     fflush(stdin);
-    
     return 0;
 }

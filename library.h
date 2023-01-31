@@ -486,12 +486,12 @@ void consultPerson()
             printf("\n%s%s", ERRORCPF);
             continue;
         }
-        if (checkIfCpfIsRegistered(cpf) == 1)
+        if (checkIfCpfIsRegistered(cpf) != 1)
         {
-            printf("%s", ERROR_CPF_EXISTS);
+            printf("%s", ERROR_CPF_NOT_EXISTS);
             continue;
         }
-    } while (validateCpf(cpf) == 0 || checkIfCpfIsRegistered(cpf) == 1);
+    } while (validateCpf(cpf) == 0 || checkIfCpfIsRegistered(cpf) != 1);
 
     while (fscanf(readFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
