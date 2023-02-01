@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
+
 
 // CREATE AND DEFINE VARIABLES VALUES
 #define LOCATIONS_LINES 5572
@@ -79,7 +81,7 @@ int validateCpf(char cpf[])
     // Check if CPF has at least and at maximum 11 digits
     if (strlen(cpf) != N_CPF_DIGITS)
     {
-        printf("O CPF precisa ter 11 digitos, sem traços ou pontos.\n");
+        printf("O CPF precisa ter 11 digitos, sem tracos ou pontos.");
         return 0;
     }
 
@@ -88,7 +90,7 @@ int validateCpf(char cpf[])
     {
         if (!isdigit(cpf[i]))
         {
-            printf("O CPF deve ser composto apenas de números, sem traços ou pontos.\n");
+            printf("O CPF deve ser composto apenas de números, sem tracos ou pontos.\n");
             return 0;
         }
         cpfDigits[i] = cpf[i] - '0';
@@ -142,7 +144,7 @@ int validateCpf(char cpf[])
     return 1;
 }
 
-void isFileOpen(file)
+void isFileOpen(FILE *file)
 {
     // check if file has been succesfuly opened
     if (!file)
@@ -349,6 +351,8 @@ int calcAge(int yearBorn, int monthBorn)
 void registerPerson()
 {
     Person pw = {0};
+    int validCpf = 0, cpfExists = 0;
+    
     FILE *writeFile = fopen("person.txt", "a");
     isFileOpen(writeFile);
     fflush(stdin);
@@ -360,24 +364,26 @@ void registerPerson()
         printf("CPF: ");
         fgets(pw.Cpf, 15, stdin);
         pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
-        if (validateCpf(pw.Cpf) == 0)
+        isCpfValid = validateCpf(pw.Cpf);
+        if (isCpfValid == 0)
         {
-            printf("\n%s%s", ERRORCPF);
+            printf("\n%s", ERRORCPF);
             continue;
+        }else{
+            cpfExists = checkIfCpfIsRegistered(pw.Cpf);
+            if (cpfExists == 1)
+            {
+                printf("%s", ERROR_CPF_EXISTS);
+            }
         }
-        if (checkIfCpfIsRegistered(pw.Cpf) == 1)
-        {
-            printf("%s", ERROR_CPF_EXISTS);
-            continue;
-        }
-    } while (validateCpf(pw.Cpf) == 0 || checkIfCpfIsRegistered(pw.Cpf) == 1);
+    } while (isCpfValid == 0 || checkIfCpfIsRegistered(pw.Cpf) == 1);
 
     do
     {
         printf("Nome: ");
         fflush(stdin);
         scanf("%[^\n]s", pw.Name);
-        tranformStringToUpper(&pw.Name);
+        tranformStringToUpper(pw.Name);
         isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
     } while (isInputValid != 1);
 
@@ -386,7 +392,7 @@ void registerPerson()
         printf("Sexo (F - Feminino, M - Masculino): ");
         fflush(stdin);
         scanf("%s", pw.Sex);
-        tranformStringToUpper(&pw.Sex);
+        tranformStringToUpper(pw.Sex);
         if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0)
         {
             printf("%s", ERRORSEX);
@@ -416,7 +422,7 @@ void registerPerson()
         printf("Cidade: ");
         fgets(pw.City, sizeof(pw.City), stdin);
         pw.City[strcspn(pw.City, "\n")] = '\0';
-        tranformStringToUpper(&pw.City);
+        tranformStringToUpper(pw.City);
         isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
 
         if (checkIfLocationExists(pw.City, 0) == 0)
@@ -431,7 +437,7 @@ void registerPerson()
         // Verify if USER UF has only 2 digits
         fflush(stdin);
         scanf("%s", pw.Uf);
-        tranformStringToUpper(&pw.Uf);
+        tranformStringToUpper(pw.Uf);
         isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
 
         if (checkIfLocationExists(pw.Uf, 1) == 0)
@@ -481,17 +487,19 @@ void consultPerson()
         fflush(stdin);
         fgets(cpf, 12, stdin);
         cpf[strcspn(cpf, "\n")] = '\0';
-        if (validateCpf(cpf) == 0)
+        isCpfValid = validateCpf(cpf);
+        if (isCpfValid == 0)
         {
-            printf("\n%s%s", ERRORCPF);
+            printf("\n%s", ERRORCPF);
             continue;
+        }else{
+            cpfExists = checkIfCpfIsRegistered(cpf);
+            if (cpfExists == 1)
+            {
+                printf("%s", ERROR_CPF_EXISTS);
+            }
         }
-        if (checkIfCpfIsRegistered(cpf) != 1)
-        {
-            printf("%s", ERROR_CPF_NOT_EXISTS);
-            continue;
-        }
-    } while (validateCpf(cpf) == 0 || checkIfCpfIsRegistered(cpf) != 1);
+    } while (isCpfValid == 0 || checkIfCpfIsRegistered(cpf) != 1);
 
     while (fscanf(readFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
@@ -500,13 +508,14 @@ void consultPerson()
         if (strcmp(pr.Cpf, cpf) == 0)
         {
             cpfExists = 1;
+            printf("\n");
             printf("---- DADOS DE: %s ----\n", pr.Name);
             printf("---- CPF:               %s \n", pr.Cpf);
             printf("---- SEXO:              %s \n", pr.Sex);
             printf("---- DT. NASCIMENTO:    %0.2d/%0.2d/%d \n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
             printf("---- CIDADE:            %s \n", pr.City);
             printf("---- ESTADO/UF          %s \n", pr.Uf);
-            exit(1);
+            printf("\n\n");
         }
     };
 
@@ -534,14 +543,13 @@ void listPeopleByCity()
 
     Locations city;
     // Receive input
-
     do
     {
         printf("Busque pelo nome da cidade: ");
         fflush(stdin);
         fgets(city.Name, sizeof(city.Name), stdin);
         city.Name[strcspn(city.Name, "\n")] = '\0';
-        tranformStringToUpper(&city.Name);
+        tranformStringToUpper(city.Name);
         // Check if city Name exists
 
     } while (checkIfLocationExists(city.Name, 0) != 1);
@@ -639,7 +647,6 @@ void generateReport()
         }
 
         // DIVISION PER SEX
-
         if (strcmp(personData.Sex, "F") == 0)
         {
             fem++;
@@ -687,6 +694,7 @@ void removeRecord()
     Person pRm;
     char cpf[16];
     char confirm[2];
+    int cpfExists = 0;
 
     printf("%s\n", REMOVE_INIT);
     FILE *primaryFile = fopen("person.txt", "r");
@@ -695,25 +703,25 @@ void removeRecord()
     isFileOpen(primaryFile);
     isFileOpen(tempFile);
 
-   ;
-
     do
     {
         printf("Digite o CPF da pessoa para exclusao: ");
         fflush(stdin);
         fgets(cpf, 12, stdin);
         cpf[strcspn(cpf, "\n")] = '\0';
-        if (validateCpf(cpf) == 0)
+        isCpfValid = validateCpf(cpf);
+        if (isCpfValid == 0)
         {
-            printf("\n%s%s", ERRORCPF);
+            printf("\n%s", ERRORCPF);
             continue;
+        }else{
+            cpfExists = checkIfCpfIsRegistered(cpf);
+            if (cpfExists == 1)
+            {
+                printf("%s", ERROR_CPF_EXISTS);
+            }
         }
-        if (checkIfCpfIsRegistered(cpf) == 1)
-        {
-            printf("%s", ERROR_CPF_EXISTS);
-            continue;
-        }
-    } while (validateCpf(cpf) == 0 || checkIfCpfIsRegistered(cpf) == 1);
+    } while (isCpfValid == 0 || checkIfCpfIsRegistered(cpf) == 1);
 
     // WRITING ON TEMPORARY FILE
     while (fscanf(primaryFile,
