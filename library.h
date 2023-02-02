@@ -254,6 +254,8 @@ int checkIfCpfIsRegistered(char cpf[])
         }
     }
 
+    fclose(readFile);
+
     return 0;
 }
 
@@ -716,12 +718,12 @@ void removeRecord()
             continue;
         }else{
             cpfExists = checkIfCpfIsRegistered(cpf);
-            if (cpfExists == 1)
+            if (cpfExists != 1)
             {
-                printf("%s", ERROR_CPF_EXISTS);
+                printf("%s", ERROR_CPF_NOT_EXISTS);
             }
         }
-    } while (isCpfValid == 0 || checkIfCpfIsRegistered(cpf) == 1);
+    } while (isCpfValid == 0 || cpfExists != 1);
 
     // WRITING ON TEMPORARY FILE
     while (fscanf(primaryFile,
@@ -740,19 +742,25 @@ void removeRecord()
         else
         {
             // In case of equal, ask for confirmation to exclude
-            printf("\n%s   |   %s\n", pRm.Cpf, pRm.Name);
-            printf("%s", CONFIRM_EXCLUDE);
-            fflush(stdin);
-            scanf("%[^\n]", confirm);
-            tranformStringToUpper(confirm);
+            do
+            {   	
+                printf("\n%s   |   %s\n", pRm.Cpf, pRm.Name);
+                printf("%s", CONFIRM_EXCLUDE);
+                fflush(stdin);
+                scanf("%[^\n]", confirm);
+                tranformStringToUpper(confirm);
 
-            // Verify input
-            if (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0)
-            {
-                printf("Opcao invalida, deve ser digitado S ou N\n");
-                printf("\n%s", RESET);
-                exit(1);
-            }
+                // Verify input
+                if (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0)
+                {
+                    printf("Opcao invalida, deve ser digitado S ou N\n");
+                }
+            } while (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0);
+            
+            // if (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0)
+            // {
+            //     exit(1);
+            // }
 
             if (strcmp(confirm, "N") == 0)
             {
@@ -764,7 +772,13 @@ void removeRecord()
     fclose(primaryFile);
     fclose(tempFile);
 
+    
     remove("person.txt");
+    if(remove("person.txt") != 0 ){
+        perror( "Error deleting file" );
+    }else{
+        puts( "File successfully deleted" );
+    }
     rename("personTemp.txt", "person.txt");
     printf("\n%s", REMOVE_SUCCESS);
 }
