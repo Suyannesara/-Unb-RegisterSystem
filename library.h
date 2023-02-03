@@ -48,6 +48,7 @@ char ERROR_UF[] = {"UF inexistente\n"};
 char ERROR_CITY[] = {"CIDADE inexistente\n"};
 char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
 char REMOVE_SUCCESS[] = {"PESSOA REMOVIDA COM SUCESSO!\n"};
+char REMOVE_ERROR[] = {"Erro ao excluir a pessoa! Por favor, tente novamente."};
 char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada!\n"};
 // OPTIONS INITIALIZATIONS
 char REPORT_INIT[] = {"------------------ APRESENTACAO RELATORIO ----------------\n"};
@@ -60,7 +61,7 @@ char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistem
 int executeMenu()
 {
     int option;
-    printf("Escolha uma das opcoes a seguir: \n");
+    printf("\nEscolha uma das opcoes a seguir: \n");
     printf("1) Cadastrar Pessoa \n");
     printf("2) Consultar Pessoa \n");
     printf("3) Listar pessoas por cidade \n");
@@ -69,6 +70,7 @@ int executeMenu()
     printf("6) Encerrar programa\n");
 
     scanf("%d", &option);
+    system("cls");
     return option;
 }
 
@@ -250,12 +252,10 @@ int checkIfCpfIsRegistered(char cpf[])
 
         if (strcmp(cpf, personData.Cpf) == 0)
         {
+            fclose(readFile);
             return 1;
         }
     }
-
-    fclose(readFile);
-
     return 0;
 }
 
@@ -581,7 +581,7 @@ void listPeopleByCity()
     
     if (hasSomeoneInCity == 0)
     {
-        printf("%s", ERROR_NOBODY_IN_CITY);
+        printf("\n%s\n", ERROR_NOBODY_IN_CITY);
     }
 
     // Sort people by name from A to Z
@@ -589,7 +589,7 @@ void listPeopleByCity()
 
     for (j = 0; j < numberOfPeople; j++)
     {
-        printf("\n%s   |   %s", listOfPeople[j].Cpf, listOfPeople[j].Name);
+        printf("\n%s   |   %s\n", listOfPeople[j].Cpf, listOfPeople[j].Name);
     }
 
     fclose(readFile);
@@ -725,7 +725,6 @@ void removeRecord()
         }
     } while (isCpfValid == 0 || cpfExists != 1);
 
-    // WRITING ON TEMPORARY FILE
     while (fscanf(primaryFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
                   pRm.Cpf, pRm.Name, pRm.Sex, &pRm.DayBorn, &pRm.MonthBorn, &pRm.yearBorn, pRm.City, pRm.Uf) != EOF)
@@ -756,15 +755,10 @@ void removeRecord()
                     printf("Opcao invalida, deve ser digitado S ou N\n");
                 }
             } while (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0);
-            
-            // if (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0)
-            // {
-            //     exit(1);
-            // }
 
             if (strcmp(confirm, "N") == 0)
             {
-                exit(1);
+                return;
             }
         }
     };
@@ -772,13 +766,19 @@ void removeRecord()
     fclose(primaryFile);
     fclose(tempFile);
 
-    
-    remove("person.txt");
-    if(remove("person.txt") != 0 ){
-        perror( "Error deleting file" );
+    int removeResult = remove("person.txt");
+    int renameResult = rename("personTemp.txt", "person.txt");
+
+    if (removeResult != 0 || renameResult != 0)
+    {
+        printf("\n%s\n", REMOVE_ERROR);
     }else{
-        puts( "File successfully deleted" );
+        printf("\n%s\n", REMOVE_SUCCESS);
     }
-    rename("personTemp.txt", "person.txt");
-    printf("\n%s", REMOVE_SUCCESS);
 }
+
+
+// MENSAGEM PESSOA NAO EXISTENTE NO SISTEMA AO CONSULTAR
+// CONSULTA - CPF JA CADASTRADO NO SISTEMA? MENSAGEM ERRADA, TROCAR PARA - NAO MOSTRAR NADA | CPF ENCONTRADO NA BASE
+// MAIS COMENTARIOS E EM PORTUGES
+// REMOVER TODOS EXITS
