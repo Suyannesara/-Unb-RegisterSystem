@@ -364,15 +364,24 @@ void tranformStringToUpper(char *string)
     }
 }
 
-int calcAge(int yearBorn, int monthBorn)
+int calcAge(int yearBorn, int monthBorn, int dayBorn)
 {
-    // Take actual date and time
+    // PEGA A DATA ATUAL
     time_t actualTime = time(NULL);
     struct tm date = *localtime(&actualTime);
 
+    // CALCULA A IDADE DE ACORDO COM O ANO
     int age = (date.tm_year) - yearBorn;
 
+    // Confere se o mes de nacimento é maior que o mes atual
+    // Se for, é retirado 1 ano da idade
     if (monthBorn > date.tm_mon + 1)
+    {
+        age--;
+    }
+    // Se o mes de nascimento nao tiver chegado ainda, ou for esse mes  E
+    // Se o dia de nascimento nao tiver chegado ainda, é retirado 1 ano da idade
+    else if (monthBorn <= date.tm_mon + 1 && dayBorn > date.tm_mday)
     {
         age--;
     }
@@ -689,7 +698,7 @@ void generateReport()
                   personData.Uf) != EOF)
     {
         // CLASSIFICA A PESSOA POR IDADE DE ACORDO COM DATA DE NASCIMENTO
-        personAge = calcAge(personData.yearBorn - 1900, personData.MonthBorn);
+        personAge = calcAge(personData.yearBorn - 1900, personData.MonthBorn, personData.DayBorn);
         if (personAge <= 15)
         {
             et15 += 1;
@@ -758,6 +767,7 @@ void generateReport()
     fclose(readFile);
 }
 
+// 3.5 REMOVER REGISTRO
 void removeRecord()
 {
     Person pRm;
