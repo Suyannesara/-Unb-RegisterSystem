@@ -206,6 +206,12 @@ int checkIfDateValid(int d, int m, int y)
     int leapYear = 0;
     int monthMaxDays = MAX_DAYS_IN_MONTH;
 
+    // CHECAR SE O ANO INPUTADO TEM 4 DIGITOS
+    if (y < 1000 || y > 9999) {
+        printf("O ano precisa ser digitado com 4 digitos!\n");
+        return 0;
+    }
+
     if (y < 0)
     {
         return 0;
@@ -474,18 +480,13 @@ void registerPerson()
 
     do
     {
-        printf("Dia Nascimento: ");
-        scanf("%d", &pw.DayBorn);
+        printf("Data de Nascimento (dia/mes/ano - Ex: 01/02/2003):");
+        scanf("%d/%d/%d", &pw.DayBorn, &pw.MonthBorn, &pw.yearBorn);
 
-        printf("Mes Nascimento: ");
-        scanf("%d", &pw.MonthBorn);
-
-        printf("Ano Nascimento: ");
-        scanf("%d", &pw.yearBorn);
         isDateValid = checkIfDateValid(pw.DayBorn, pw.MonthBorn, pw.yearBorn);
         if (isDateValid != 1)
         {
-            printf("%s", ERRORDATE);
+            printf("\n%s%s", ERRORDATE, ASK_INFO_AGAIN);
         }
     } while (isDateValid != 1);
 
@@ -927,11 +928,5 @@ void removeRecord()
     }
 }
 
-// NENHUMA PESSOA CADASTRADA PARA EXECUTAR AS OUTRAS FUNCOES - ERRO
-// MENSAGEM PESSOA NAO EXISTENTE NO SISTEMA AO CONSULTAR
-// PEDIR DATA DO JEITO QUE ESTA SENDO PEDIDA?
 // PUXAR UF A PARTIR DA CIDADE
-// VALIDACOES DE NASCIMENTO
-// CONSULTA - CPF JA CADASTRADO NO SISTEMA? MENSAGEM ERRADA, TROCAR PARA - NAO MOSTRAR NADA | CPF ENCONTRADO NA BASE
 // MAIS COMENTARIOS E EM PORTUGES
-// CLASSIFICAR DE ACORDO COM DIA DE NASCIMENTO TBM NO RELATORIO
