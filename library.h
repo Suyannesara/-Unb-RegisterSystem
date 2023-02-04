@@ -4,7 +4,7 @@
 #include <time.h>
 #include <ctype.h>
 
-// CREATE AND DEFINE VARIABLES VALUES
+// CRIA E DEFINE VALORES PARA AS VARIAVEIS
 #define LOCATIONS_LINES 5572
 #define N_CPF_DIGITS 11
 #define MAX_DAYS_IN_MONTH 31
@@ -35,10 +35,15 @@ int isCpfValid,
     ufExists,
     isElementPresentInGroup = 0;
 
-// MESSAGES
+// MENSAGENS
 char RESET[] = {"\n------------- REINICIANDO O SISTEMA ------------"};
 char ASK_INFO_AGAIN[] = {"\nPor favor, digite novamente:\n\n"};
 char ASK_FOR_ANOTHER[] = {"\nDigite outro, se desejar:\n\n"};
+char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
+char REMOVE_SUCCESS[] = {"PESSOA REMOVIDA COM SUCESSO!\n"};
+char REMOVE_ERROR[] = {"Erro ao excluir a pessoa! Por favor, tente novamente."};
+char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada!\n"};
+char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistema?(S/N)\n"};
 
 // ERROS - VALIDACAO CPF
 char ERROR_CPF_EXISTS[] = {"CPF ja cadastrado no sistema!"};
@@ -50,19 +55,12 @@ char NO_RECORDS[] = {"\nAinda nao ha nenhum beneficiado registrado na base de da
 
 // ERROS - VALIDACAO DE OUTROS INPUTS
 char ERROR_INPUT_NOT_STRING[] = {"Voce deve digitar apenas letras, SEM simbolos ou acentos para esse campo!"};
-char ERROR_INPUT_LIMIT[] = {"Voce ultrapassou o limite de caracteres para esse campo!"};
+char ERROR_INPUT_LIMIT[] = {"Ou voce ultrapassou o limite de caracteres para esse campo ou digitou apenas um espaco, nao e valido!"};
 char ERRORDATE[] = {"Data de nascimento invalida\n"};
 char ERRORFILE[] = {"Erro ao abrir a base de dados. Tente novamente mais tarde\n"};
 char ERRORSEX[] = {"\nO sexo digitado deve ser F ou M"};
 char ERROR_UF[] = {"UF inexistente\n"};
 char ERROR_CITY[] = {"CIDADE inexistente"};
-
-//??
-char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
-char REMOVE_SUCCESS[] = {"PESSOA REMOVIDA COM SUCESSO!\n"};
-char REMOVE_ERROR[] = {"Erro ao excluir a pessoa! Por favor, tente novamente."};
-char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada!\n"};
-char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistema?(S/N)\n"};
 
 // MENSAGENS DE INICIALIZACAO DE OPCOES
 char REPORT_INIT[] = {"------------------ RELATORIO DE PESSOAS BENEFICIADAS ----------------\n"};
@@ -71,7 +69,7 @@ char MENU[] = {"-------------- MENU DE OPCOES -------------\n"};
 char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
 
-// INIT CODE FUNCTION
+// 1. FUNCAO INICIAL DO CODIGO
 int executeMenu()
 {
     int option;
@@ -90,7 +88,6 @@ int executeMenu()
 }
 
 // 2. VALIDACOES E FUNCOES AUXILIARES
-
 // 2.1 VALIDADOR DE CPF
 int validateCpf(char cpf[])
 {
@@ -172,7 +169,7 @@ int validateCpf(char cpf[])
 
 int isFileOpen(FILE *file)
 {
-    // check if file has been succesfuly opened
+    // CONFERE O ARQUIVO FOI ABERTO, SE NAO - ERRO
     if (!file)
     {
         printf("%s%s", ERRORFILE, RESET);
@@ -183,50 +180,47 @@ int isFileOpen(FILE *file)
 
 int checkIfFileHasRecords(FILE *file)
 {
-    // Move o ponteiro de posicao para o início do arquivo
+    // MOVE O PONTEIRO DE POSICAO PARA O INICIO DO ARQUIVO
     fseek(file, 0, SEEK_SET);
     int regCount = 0;
-    // Define uma variável para armazenar cada linha lida do arquivo
+    // VARIAVEL PARA ARMAZENAR CADA LINHA DO ARQUIVO
     char line[5000];
 
-    // Enquanto houver linhas a serem lidas
+    // ENQUANTO HOUVER LINHAS PARA SEREM LIDAS
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        // Incrementa a quantidade de registros lidos
+        // INCREMENTA A QUANTIDADE DE REGISTROS
         regCount++;
     }
-    // Move o ponteiro de posicao para o início do arquivo novamente
+    //MOVE O PONTEIRO DE POSICAO PARA O INICIO DO ARQUIVO DE NOVO
     fseek(file, 0, SEEK_SET);
     return regCount;
 }
-
 
 int checkIfDateValid(int d, int m, int y)
 {
     int leapYear = 0;
     int monthMaxDays = MAX_DAYS_IN_MONTH;
 
-    // CHECAR SE O ANO INPUTADO TEM 4 DIGITOS
+    // CONFERE SE O ANO INPUTADO TEM 4 DIGITOS
     if (y < 1000 || y > 9999) {
         printf("O ano precisa ser digitado com 4 digitos!\n");
         return 0;
     }
 
-    if (y < 0)
-    {
-        return 0;
-    };
-
+    // CONFERE SE MES ESTÁ ENTRE 1 E 12
     if (m < 1 || m > 12)
     {
         return 0;
     };
 
+    // DIA É MAIOR QUE 1?
     if (d < 1)
     {
         return 0;
     };
 
+    // SE O MES FOR FEVEREIRO, CONFERE SE É BISSEXTO O ANO
     if (m == 2)
     {
         if ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0))
@@ -248,6 +242,7 @@ int checkIfDateValid(int d, int m, int y)
         monthMaxDays = 30;
     };
 
+    // CONFERE SE DIAS ESTAO DENTRO DO NUMERO MAXIMO DEFINIDO
     if (d > monthMaxDays)
     {
         return 0;
@@ -292,7 +287,7 @@ int checkIfCpfIsRegistered(char cpf[])
 
     Person personData;
 
-    // Read data
+    // LE DADOS DO ARQUIVO
     while (fscanf(readFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
                   personData.Cpf,
@@ -305,6 +300,7 @@ int checkIfCpfIsRegistered(char cpf[])
                   personData.Uf) != EOF)
     {
 
+        // SE O CPF FOR IGUAL, JA ESTÁ REGISRTADO NO SISTEMA
         if (strcmp(cpf, personData.Cpf) == 0)
         {
             fclose(readFile);
@@ -335,7 +331,7 @@ int ufCorrespondsToCity(char cityName[], char uf[]){
     while (fgets(locationLine, sizeof(locationLine), fp2))
     {
         // PEGA A UF E CIDADE DO ARQUIVO
-        ufToken = strtok(locationLine, ",");
+        ufToken = strtok(locationLine, ","); // Ignora a primeira coluna do arquivo
         ufToken = strtok(NULL, ","); // Recebe a segunda coluna do arquivo
         cityTokenNoAccent = strtok(NULL, ","); 
         cityTokenNoAccent = strtok(NULL, ","); 
@@ -349,7 +345,7 @@ int ufCorrespondsToCity(char cityName[], char uf[]){
         }
         size++;
     }
-    // Close the file
+
     fclose(fp2);
     return 1;
 }
@@ -378,9 +374,10 @@ int checkIfLocationExists(char userInput[], int locationType)
             ufToken = strtok(locationLine, ",");
             ufToken = strtok(NULL, ",");
 
-            // Verify if TOKEN == INPUT - If so, UF EXISTS
+            // VERIFICA SE TOKEN == INPUT - SE SIM, UF EXISTE
             if (strcmp(userInput, ufToken) == 0)
             {
+                fclose(fp2);
                 return 1;
             }
             size++;
@@ -393,29 +390,31 @@ int checkIfLocationExists(char userInput[], int locationType)
         while (fgets(locationLine, sizeof(locationLine), fp2))
         {
             cityTokenNoAccent = strtok(locationLine, ",");
-            cityTokenNoAccent = strtok(NULL, ","); // Receive second line
-            cityTokenNoAccent = strtok(NULL, ","); // Receive third line
-            cityTokenNoAccent = strtok(NULL, ","); // Receive forth file line
+            cityTokenNoAccent = strtok(NULL, ","); 
+            cityTokenNoAccent = strtok(NULL, ","); 
+            cityTokenNoAccent = strtok(NULL, ","); 
 
-            // Verify if TOKEN == INPUT - If so, CITY EXISTS
+            // VERIFICA SE TOKEN == INPUT - SE SIM, CIDADE EXISTE
             if (strcmp(userInput, cityTokenNoAccent) == 0)
             {
+                fclose(fp2);
                 return 1;
             }
             size++;
         }
     }
 
-    // Close the file
     fclose(fp2);
-
     return 0;
 }
 
 int orderPeopleInAlphabet(const void *p1, const void *p2)
 {
+    // CRIA PONTEIROS COM O STRUCT DE PESSOA
     Person *pa = (Person *)p1;
     Person *pb = (Person *)p2;
+
+    // COMPARA O NOME DOS DOIS PONTEIROS E RETORNA 1 OU 0
     return strcmp(pa->Name, pb->Name);
 }
 
@@ -424,6 +423,7 @@ void tranformStringToUpper(char *string)
     char caracter;
     int i;
 
+    // USA FUNCAO TO UPPER PARA CADA CARACTER E ARMAZENA NOVA STRING EM ARRAY
     for (i = 0; i < strlen(string); i++)
     {
         caracter = string[i];
@@ -974,7 +974,3 @@ void removeRecord()
         printf("\n%s\n", REMOVE_SUCCESS);
     }
 }
-
-// NUMERO DE CARACTERES INCORRETOS PARA O CAMPO, SE POE ESPACO, MANDA ISSO
-// PUXAR UF A PARTIR DA CIDADE
-// MAIS COMENTARIOS E EM PORTUGES
