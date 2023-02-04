@@ -64,8 +64,9 @@ char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada
 char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistema?(S/N)\n"};
 
 // MENSAGENS DE INICIALIZACAO DE OPCOES
-char REPORT_INIT[] = {"------------------ APRESENTACAO RELATORIO ----------------\n"};
+char REPORT_INIT[] = {"------------------ RELATORIO DE PESSOAS BENEFICIADAS ----------------\n"};
 char REMOVE_INIT[] = {"----------- REMOCAO DE REGISTRO ---------"};
+char MENU[] = {"-------------- MENU DE OPCOES -------------\n"};
 char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
 
@@ -73,7 +74,8 @@ char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
 int executeMenu()
 {
     int option;
-    printf("\nEscolha uma das opcoes a seguir: \n");
+    printf("\n%s", MENU);
+    printf("Escolha uma das opcoes a seguir: \n");
     printf("1) Cadastrar Pessoa \n");
     printf("2) Consultar Pessoa \n");
     printf("3) Listar pessoas por cidade \n");
@@ -656,8 +658,15 @@ void listPeopleByCity()
     fclose(readFile);
 }
 
+// 3.4 GERAR RELATORIO DE PESSOAS BENEFICIADAS
 void generateReport()
 {
+    int registeredPeople = 0;
+    int personAge = 0;
+    int et15 = 0, et16 = 0, et30 = 0, et50 = 0, et60 = 0;
+    int fem = 0, masc = 0;
+    float p15 = 0, p16 = 0, p30 = 0, p50 = 0, p60 = 0;
+    float pM = 0, pF = 0;
     Person personData;
 
     FILE *readFile = fopen("person.txt", "r");
@@ -667,13 +676,7 @@ void generateReport()
         return;
     }
 
-    int registeredPeople = 0;
-    int personAge = 0;
-    int et15 = 0, et16 = 0, et30 = 0, et50 = 0, et60 = 0;
-    int fem = 0, masc = 0;
-    float p15 = 0, p16 = 0, p30 = 0, p50 = 0, p60 = 0;
-    float pM = 0, pF = 0;
-
+    // FAZ A LEITURA DE TODOS OS DADOS DO ARQUIVO DE PESSOA
     while (fscanf(readFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
                   personData.Cpf,
@@ -685,7 +688,7 @@ void generateReport()
                   personData.City,
                   personData.Uf) != EOF)
     {
-        // CLASSIFY BY AGE
+        // CLASSIFICA A PESSOA POR IDADE DE ACORDO COM DATA DE NASCIMENTO
         personAge = calcAge(personData.yearBorn - 1900, personData.MonthBorn);
         if (personAge <= 15)
         {
@@ -695,7 +698,6 @@ void generateReport()
         if (personAge >= 16 && personAge <= 29)
         {
             et16 += 1;
-            // printf("%d", et16);
         }
 
         if (personAge >= 30 && personAge <= 49)
@@ -713,7 +715,7 @@ void generateReport()
             et60 += 1;
         }
 
-        // DIVISION PER SEX
+        // CLASSIFICA PESSOA DE ACORDO COM O SEXO
         if (strcmp(personData.Sex, "F") == 0)
         {
             fem++;
@@ -723,14 +725,14 @@ void generateReport()
             masc++;
         }
 
-        // Count people on file
+        // CONTA QUANTAS PESSOAS HA NO ARQUIVO
         registeredPeople++;
     }
 
-    // PERCENTAGE PER AGE
     printf("%s\n", REPORT_INIT);
     printf("TOTAL PESSOAS BENEFICIADAS: %d\n\n", registeredPeople);
 
+    // CALCULA A PORCENTAGEM POR FAIZA ETARIA
     p15 = ((float)et15 / registeredPeople) * 100;
     p16 = ((float)et16 / registeredPeople) * 100;
     p30 = ((float)et30 / registeredPeople) * 100;
@@ -745,7 +747,7 @@ void generateReport()
     printf("50 a 60 : %.2f%%\n", p50);
     printf("60+ : %.2f%%\n", p60);
 
-    // PERCENT PER SEX
+    // CALCULA A PORCENTAGEM POR SEXO
     printf("\n%s", PERCENT_BY_SEX);
     pM = ((float)masc / registeredPeople) * 100;
     pF = ((float)fem / registeredPeople) * 100;
@@ -849,9 +851,12 @@ void removeRecord()
     }
 }
 
+
+// NENHUMA PESSOA CADASTRADA PARA EXECUTAR AS OUTRAS FUNCOES - ERRO
 // MENSAGEM PESSOA NAO EXISTENTE NO SISTEMA AO CONSULTAR
 // PEDIR DATA DO JEITO QUE ESTA SENDO PEDIDA?
 // PUXAR UF A PARTIR DA CIDADE
 // VALIDACOES DE NASCIMENTO
 // CONSULTA - CPF JA CADASTRADO NO SISTEMA? MENSAGEM ERRADA, TROCAR PARA - NAO MOSTRAR NADA | CPF ENCONTRADO NA BASE
 // MAIS COMENTARIOS E EM PORTUGES
+// CLASSIFICAR DE ACORDO COM DIA DE NASCIMENTO TBM NO RELATORIO
