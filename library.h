@@ -69,6 +69,16 @@ char MENU[] = {"-------------- MENU DE OPCOES -------------\n"};
 char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
 
+
+// FUNCAO DE LIMPAR TELA
+    void clearScreen() {
+        #ifdef _WIN32
+        system("cls");
+        #else
+        system("clear");
+        #endif
+    }
+
 // 1. FUNCAO INICIAL DO CODIGO
 int executeMenu()
 {
@@ -83,7 +93,7 @@ int executeMenu()
     printf("6) Encerrar programa\n");
 
     scanf("%d", &option);
-    system("cls");
+    clearScreen();
     return option;
 }
 
@@ -583,7 +593,7 @@ void registerPerson()
     fprintf(writeFile, "%02d/%02d/%02d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
     fprintf(writeFile, "%s\n", pw.City);
     fprintf(writeFile, "%s\n", pw.Uf);
-    system("cls");
+    clearScreen();
     printf("\n\n%s\n", SUCCESS_REGISTERED);
 
     // FECHA O ARQUIVO
