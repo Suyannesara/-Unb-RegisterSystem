@@ -54,7 +54,7 @@ char ERRORDATE[] = {"Data de nascimento invalida\n"};
 char ERRORFILE[] = {"Erro ao abrir a base de dados. Tente novamente mais tarde\n"};
 char ERRORSEX[] = {"\nO sexo digitado deve ser F ou M"};
 char ERROR_UF[] = {"UF inexistente\n"};
-char ERROR_CITY[] = {"CIDADE inexistente\n"};
+char ERROR_CITY[] = {"CIDADE inexistente"};
 
 //??
 char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
@@ -287,7 +287,6 @@ int checkIfCpfIsRegistered(char cpf[])
 
 int checkIfLocationExists(char userInput[], int locationType)
 {
-
     int size = 0;
     char locationLine[LOCATIONS_LINES];
     char *ufToken;
@@ -379,7 +378,8 @@ int calcAge(int yearBorn, int monthBorn)
     return age;
 }
 
-// CORE CODE FUNCTIONS
+// 3.FUNCOES DO MENU DE OPCOES
+// 3.1 REGISTRO DE PESSOA BENEFICIADA
 void registerPerson()
 {
     Person pw = {0};
@@ -470,7 +470,7 @@ void registerPerson()
         {
             if (checkIfLocationExists(pw.City, 0) == 0)
             {
-                printf("%s", ERROR_CITY);
+                printf("%s%s", ERROR_CITY, ASK_INFO_AGAIN);
             }
         }
 
@@ -506,10 +506,10 @@ void registerPerson()
     system("cls");
     printf("%s\n", SUCCESS_REGISTERED);
 
-    // DECHA O ARQUIVO
+    // FECHA O ARQUIVO
     fclose(writeFile);
 }
-
+// 3.2 CONSULTA DE PESSOA BENEFICIADA
 void consultPerson()
 {
     Person pr = {0};
@@ -571,7 +571,7 @@ void consultPerson()
 
     fclose(readFile);
 }
-
+// 3.3 LISTAR PESSOAS POR CIDADE
 void listPeopleByCity()
 {
     int j = 0;
@@ -590,20 +590,31 @@ void listPeopleByCity()
     }
 
     Locations city;
-    // Receive input
+
+    // PEDE NOME DA CIDADE E VERIFICA SE ELA EXISTE ATE QUE SEJA DIGITADA UMA CIDADE EXISTENTE
     do
     {
-        printf("Busque pelo nome da cidade: ");
         fflush(stdin);
+        printf("Cidade: ");
         fgets(city.Name, sizeof(city.Name), stdin);
         city.Name[strcspn(city.Name, "\n")] = '\0';
         tranformStringToUpper(city.Name);
-        // Check if city Name exists
+        isInputValid = checkIfInputIsValid(city.Name, sizeof(city.Name));
 
-    } while (checkIfLocationExists(city.Name, 0) != 1);
+        if (isInputValid == 0)
+        {
+            if (checkIfLocationExists(city.Name, 0) == 0)
+            {
+                printf("%s%s", ERROR_CITY, ASK_INFO_AGAIN);
+            }
+        }
 
-    // Search on person file. Compare each city line with Name, see the ones that are compatible and insert in a array;
-    // Read each line on file
+    } while (isInputValid != 0 || checkIfLocationExists(city.Name, 0) == 0);
+
+    printf("\n-------------- LISTA DE PESSOAS EM %s -------------", city.Name);
+
+    // FAZ A LEITURA DOS DADOS NA BASE
+    // COMPARA A CIDADE DE CADA PESSOA COM CADA LINHA DO ARQUIVO DE CIDADES
     while (fscanf(readFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
                   personByCityStruct.Cpf,
@@ -616,6 +627,7 @@ void listPeopleByCity()
                   personByCityStruct.Uf) != EOF)
     {
 
+        // SE O NOME DA CIDADE É IGUAL, A PESSOA CORRESPONDENTE É SALVA NO ARRAY DE STRUCTS - personByCityStruct
         if (strcmp(city.Name, personByCityStruct.City) == 0)
         {
             hasSomeoneInCity = 1;
@@ -624,19 +636,23 @@ void listPeopleByCity()
         }
     }
 
+    // SE NAO TEM NENHUM REGISTRO CORRESPONDENTE À CIDADE, ERRO E VOLTA AO MENU
     if (hasSomeoneInCity == 0)
     {
         printf("\n%s\n", ERROR_NOBODY_IN_CITY);
+        return;
     }
 
-    // Sort people by name from A to Z
+    // ORDENA OS REGISTRO EM ORDEM ALFABETICA DE NOME
     qsort(listOfPeople, numberOfPeople, sizeof(Person), orderPeopleInAlphabet);
 
+    // MOSTRA A LISTA DE REGISTROS CORRESPONDENTES À CIDADE
     for (j = 0; j < numberOfPeople; j++)
     {
-        printf("\n%s   |   %s\n", listOfPeople[j].Cpf, listOfPeople[j].Name);
+        printf("\n%s   |   %s", listOfPeople[j].Cpf, listOfPeople[j].Name);
     }
 
+    printf("\n");
     fclose(readFile);
 }
 
