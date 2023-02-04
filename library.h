@@ -775,6 +775,7 @@ void removeRecord()
         return;
     }
 
+    // PEDE O CPF E FAZ SUA VALIDACAO
     do
     {
         printf("Digite o CPF da pessoa para exclusao: ");
@@ -797,10 +798,12 @@ void removeRecord()
         }
     } while (isCpfValid == 0 || cpfExists != 1);
 
+    // FAZ A LEITURA DE TODOS OS DADOS DO ARQUIVO INICIAL
     while (fscanf(primaryFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
                   pRm.Cpf, pRm.Name, pRm.Sex, &pRm.DayBorn, &pRm.MonthBorn, &pRm.yearBorn, pRm.City, pRm.Uf) != EOF)
     {
+        // SE O CPF É DIFERENTE DO QUE DEVE EXCLUIR, OS DADOS SAO ESCRITOS EM UM ARQUIVO TEMPORARIO
         if (strcmp(pRm.Cpf, cpf) != 0)
         {
             fprintf(tempFile, "%s\n", pRm.Cpf);
@@ -812,7 +815,7 @@ void removeRecord()
         }
         else
         {
-            // In case of equal, ask for confirmation to exclude
+            // SE O CPF É O QUE DEVE SER EXCLUIDO, PEDE CONFIRMACAO PARA EXCLUSAO
             do
             {
                 printf("\n%s   |   %s\n", pRm.Cpf, pRm.Name);
@@ -821,15 +824,19 @@ void removeRecord()
                 scanf("%[^\n]", confirm);
                 tranformStringToUpper(confirm);
 
-                // Verify input
+                // VERIFICA SE O INPUT É N OU S, ATE QUE SEJA DIGITADA UMA DAS DUAS LETRAS
                 if (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0)
                 {
                     printf("Opcao invalida, deve ser digitado S ou N\n");
                 }
             } while (strcmp(confirm, "N") != 0 && strcmp(confirm, "S") != 0);
 
+            // SE NA CONFIRMACAO FOR DIGITADO "N", VOLTA AO MENU E EXLUI O TEMP
             if (strcmp(confirm, "N") == 0)
             {
+                fclose(primaryFile);
+                fclose(tempFile);
+                remove("personTemp.txt");
                 return;
             }
         }
@@ -838,9 +845,12 @@ void removeRecord()
     fclose(primaryFile);
     fclose(tempFile);
 
+    // REMOVE O ARQUIVO INICIAL
     int removeResult = remove("person.txt");
+    // RENOMEIA O TEMPORARIO COM O NOME DO INICIAL
     int renameResult = rename("personTemp.txt", "person.txt");
 
+    // SE A REMOCAO OU A RENOMEACAO DEREM ERRADO OU CERTO, É MOSTRADO NA TELA
     if (removeResult != 0 || renameResult != 0)
     {
         printf("\n%s\n", REMOVE_ERROR);
