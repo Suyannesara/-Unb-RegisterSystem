@@ -490,8 +490,8 @@ void registerPerson()
     do
     {
         printf("CPF(Ex: 04285172186): ");
-        fgets(pw.Cpf, 15, stdin);
-        pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0'; // Remove \n e troca por um caracter nulo
+        scanf("%[^\n]", pw.Cpf);
+        getchar(); // Remove \n e troca por um caracter nulo
         isCpfValid = validateCpf(pw.Cpf);
         if (isCpfValid == 0)
         {
@@ -545,8 +545,8 @@ void registerPerson()
     {
         fflush(stdin);
         printf("Cidade: ");
-        fgets(pw.City, sizeof(pw.City), stdin);
-        pw.City[strcspn(pw.City, "\n")] = '\0';
+        scanf("%[^\n]", pw.City);
+        getchar();
         tranformStringToUpper(pw.City);
         isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
 
@@ -626,10 +626,10 @@ void consultPerson()
     // PEDE O CPF E FAZ SUA VALIDACAO
     do
     {
-        printf("Digite o CPF para consulta: (Ex: 04285172186)");
+        printf("Digite o CPF para consulta (Ex: 04285172186):");
         fflush(stdin);
-        fgets(cpf, 12, stdin);
-        cpf[strcspn(cpf, "\n")] = '\0';
+        scanf("%[^\n]", cpf);
+        getchar();
         isCpfValid = validateCpf(cpf);
         if (isCpfValid == 0)
         {
@@ -702,8 +702,8 @@ void listPeopleByCity()
     {
         fflush(stdin);
         printf("Cidade: ");
-        fgets(city.Name, sizeof(city.Name), stdin);
-        city.Name[strcspn(city.Name, "\n")] = '\0';
+        scanf("%[^\n]", city.Name);
+        getchar();
         tranformStringToUpper(city.Name);
         isInputValid = checkIfInputIsValid(city.Name, sizeof(city.Name));
 
@@ -904,8 +904,8 @@ void removeRecord()
     {
         printf("Digite o CPF da pessoa para exclusao: ");
         fflush(stdin);
-        fgets(cpf, 12, stdin);
-        cpf[strcspn(cpf, "\n")] = '\0';
+        scanf("%[^\n]", cpf);
+        getchar();
         isCpfValid = validateCpf(cpf);
         if (isCpfValid == 0)
         {
