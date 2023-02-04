@@ -48,6 +48,8 @@ char ERROR_CPF_FORMAT[] = {"!FORMATO ESPERADO INVALIDO: O CPF precisa ter 11 dig
 char ERROR_CPF_NOT_NUMBERS[] = {"!OPS, PARECE QUE VOCE DIGITOU ALGO DIFENTE DE NUMEROS: O CPF deve ser composto apenas de numeros, e deve ter 11 digitos escritos sem tracos ou pontos."};
 
 // ERROS - VALIDACAO DE OUTROS INPUTS
+char ERROR_INPUT_NOT_STRING[] = {"Voce deve digitar apenas letras, SEM simbolos ou acentos para esse campo!"};
+char ERROR_INPUT_LIMIT[] = {"Voce ultrapassou o limite de caracteres para esse campo!"};
 char ERRORDATE[] = {"Data de nascimento invalida\n"};
 char ERRORFILE[] = {"Erro ao abrir a base de dados. Tente novamente mais tarde\n"};
 char ERRORSEX[] = {"\nO sexo digitado deve ser F ou M"};
@@ -95,7 +97,7 @@ int validateCpf(char cpf[])
     // CONFERE SE CPF ...
     if (strlen(cpf) == N_CPF_DIGITS) // TEM APENAS 11 DIGITOS?
     {
-        //SE SIM - É COMPOSTO APENAS DE NÚMEROS?
+        // SE SIM - É COMPOSTO APENAS DE NÚMEROS?
         for (i = 0; i < 11; i++)
         {
             if (!isdigit(cpf[i]))
@@ -105,7 +107,9 @@ int validateCpf(char cpf[])
             }
             cpfDigits[i] = cpf[i] - '0';
         }
-    }else{
+    }
+    else
+    {
         printf("%s", ERROR_CPF_FORMAT);
         return 0;
     }
@@ -126,7 +130,8 @@ int validateCpf(char cpf[])
 
     // TEM SEU PRIMEIRO DIGITO VALIDO?
     d1 = 0;
-    for (i = 0; i < 9; i++){
+    for (i = 0; i < 9; i++)
+    {
         d1 += cpfDigits[i] * (10 - i);
     }
 
@@ -226,24 +231,24 @@ int checkIfInputIsValid(char input[], int maxChar)
 {
     int inputLen = strlen(input);
 
-    // Check if maximum length is attendend
+    // CONFERE SE O LIMITE MAXIMO DE CARACTERES NAO É EXCEDIDO
     if (inputLen > maxChar || (inputLen == 0))
     {
-        printf("Voce ultrapassou o limite de caracteres para esse campo!\n");
-        return 0;
+        printf("%s%s", ERROR_INPUT_LIMIT, ASK_INFO_AGAIN);
+        return 1;
     }
 
-    // issspace - check if it is a blank space
+    // CONFERE SE É COMPOSTA APENAS DE LETRAS
     for (int i = 0; i < inputLen; i++)
     {
         if (!(input[i] >= 'A' && input[i] <= 'Z' || input[i] == ' '))
         {
-            printf("Os inputs conter apenas letras ou espacos!\n ");
-            return 0;
+            printf("%s%s", ERROR_INPUT_NOT_STRING, ASK_INFO_AGAIN);
+            return 1;
         }
     }
 
-    return 1;
+    return 0;
 }
 
 int checkIfCpfIsRegistered(char cpf[])
@@ -251,7 +256,10 @@ int checkIfCpfIsRegistered(char cpf[])
     FILE *readFile = fopen("person.txt", "r");
 
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
-    if (isFileOpen(readFile) == 1){ executeMenu(); }
+    if (isFileOpen(readFile) == 1)
+    {
+        executeMenu();
+    }
 
     Person personData;
 
@@ -288,7 +296,10 @@ int checkIfLocationExists(char userInput[], int locationType)
     FILE *fp2 = fopen("locations.csv", "r");
 
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
-    if (isFileOpen(fp2) == 1){ executeMenu(); }
+    if (isFileOpen(fp2) == 1)
+    {
+        executeMenu();
+    }
 
     if (locationType == 1)
     {
@@ -375,19 +386,24 @@ void registerPerson()
     Person pw = {0};
     int validCpf = 0, cpfExists = 0;
 
+    // ABRE O ARQUIVO
     FILE *writeFile = fopen("person.txt", "a");
 
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
-    if (isFileOpen(writeFile) == 1){ return; }
-    
+    if (isFileOpen(writeFile) == 1)
+    {
+        return;
+    }
+
     fflush(stdin);
-    // Getting people`s data
+
+    // PEDE OS DADOS
     printf("-------------------- REGISTRO DE PESSOA --------------------\n");
     do
     {
         printf("CPF: ");
         fgets(pw.Cpf, 15, stdin);
-        pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0';
+        pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0'; // Remove \n e troca por um caracter nulo
         isCpfValid = validateCpf(pw.Cpf);
         if (isCpfValid == 0)
         {
@@ -411,7 +427,7 @@ void registerPerson()
         scanf("%[^\n]s", pw.Name);
         tranformStringToUpper(pw.Name);
         isInputValid = checkIfInputIsValid(pw.Name, sizeof(pw.Name));
-    } while (isInputValid != 1);
+    } while (isInputValid != 0);
 
     do
     {
@@ -451,11 +467,15 @@ void registerPerson()
         tranformStringToUpper(pw.City);
         isInputValid = checkIfInputIsValid(pw.City, sizeof(pw.City));
 
-        if (checkIfLocationExists(pw.City, 0) == 0)
+        if (isInputValid == 0)
         {
-            printf("%s", ERROR_CITY);
+            if (checkIfLocationExists(pw.City, 0) == 0)
+            {
+                printf("%s", ERROR_CITY);
+            }
         }
-    } while (isInputValid != 1 || checkIfLocationExists(pw.City, 0) == 0);
+
+    } while (isInputValid != 0 || checkIfLocationExists(pw.City, 0) == 0);
 
     do
     {
@@ -464,17 +484,20 @@ void registerPerson()
         fflush(stdin);
         scanf("%s", pw.Uf);
         tranformStringToUpper(pw.Uf);
-        isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf));
+        isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf)-1);
 
-        if (checkIfLocationExists(pw.Uf, 1) == 0)
+        if (isInputValid == 0)
         {
-            printf("%s", ERROR_UF);
+            if (checkIfLocationExists(pw.Uf, 1) == 0)
+            {
+                printf("%s", ERROR_UF);
+            }
         }
-    } while (isInputValid != 1 || checkIfLocationExists(pw.Uf, 1) == 0);
+    } while (isInputValid != 0 || checkIfLocationExists(pw.Uf, 1) == 0);
 
     fflush(stdin);
 
-    // FILE - If it was ok - print on file
+    // SE PASSOU POR TODAS AS VALIDAÇÕES DOS INPUTS ACIMA, ESCREVE NO ARQUIVO
     fprintf(writeFile, "%s\n", pw.Cpf);
     fprintf(writeFile, "%s\n", pw.Name);
     fprintf(writeFile, "%s\n", pw.Sex);
@@ -484,7 +507,7 @@ void registerPerson()
     system("cls");
     printf("%s\n", SUCCESS_REGISTERED);
 
-    // FILE - Close file
+    // DECHA O ARQUIVO
     fclose(writeFile);
 }
 
@@ -498,7 +521,10 @@ void consultPerson()
     FILE *readFile = fopen("person.txt", "r");
 
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
-    if (isFileOpen(readFile) == 1){ return; }
+    if (isFileOpen(readFile) == 1)
+    {
+        return;
+    }
 
     do
     {
@@ -542,7 +568,7 @@ void consultPerson()
 
     if (cpfExists == 0)
     {
-        printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_INFO_AGAIN );
+        printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_INFO_AGAIN);
     }
 
     fclose(readFile);
@@ -560,7 +586,10 @@ void listPeopleByCity()
 
     FILE *readFile = fopen("person.txt", "r");
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
-    if (isFileOpen(readFile) == 1){ return; }
+    if (isFileOpen(readFile) == 1)
+    {
+        return;
+    }
 
     Locations city;
     // Receive input
@@ -619,7 +648,10 @@ void generateReport()
 
     FILE *readFile = fopen("person.txt", "r");
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
-    if (isFileOpen(readFile) == 1){ return; }
+    if (isFileOpen(readFile) == 1)
+    {
+        return;
+    }
 
     int registeredPeople = 0;
     int personAge = 0;
@@ -722,7 +754,10 @@ void removeRecord()
     FILE *tempFile = fopen("personTemp.txt", "ab");
 
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
-    if (isFileOpen(primaryFile) == 1 || isFileOpen(tempFile) == 1){ return; }
+    if (isFileOpen(primaryFile) == 1 || isFileOpen(tempFile) == 1)
+    {
+        return;
+    }
 
     do
     {
