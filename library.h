@@ -351,7 +351,6 @@ int orderPeopleInAlphabet(const void *p1, const void *p2)
     return strcmp(pa->Name, pb->Name);
 }
 
-// Using reference to upperString
 void tranformStringToUpper(char *string)
 {
     char caracter;
@@ -526,6 +525,7 @@ void consultPerson()
         return;
     }
 
+    // PEDE O CPF E FAZ SUA VALIDACAO
     do
     {
         printf("Digite o CPF para consulta: ");
@@ -540,21 +540,24 @@ void consultPerson()
         }
         else
         {
+            // SE O CPF É VALIDO, CONFERE SE ELE EXISTE NA BASE DE DADOS
             cpfExists = checkIfCpfIsRegistered(cpf);
+            // SE NAO EXISTE, PEDE OUTRO NOVAMENTE
             if (cpfExists == 0)
             {
-                printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_INFO_AGAIN);
+                printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_FOR_ANOTHER);
             }
         }
     } while (isCpfValid == 0 || checkIfCpfIsRegistered(cpf) != 1);
 
+    // FAZ A LEITURA DE TODOS OS DADOS DO ARQUIVO ENQUANTO NAO FOR O FIM (EOF - END OF FILE)
     while (fscanf(readFile,
                   "%s\n%[^\n]\n%s\n%d/%d/%d\n%[^\n]\n%[^\n]",
                   pr.Cpf, pr.Name, pr.Sex, &pr.DayBorn, &pr.MonthBorn, &pr.yearBorn, pr.City, pr.Uf) != EOF)
     {
+        // QUANDO ECONTRA O CPF PROCURADO, MOSTRA SEUS DADOS E VOLTA AO MENU
         if (strcmp(pr.Cpf, cpf) == 0)
         {
-            cpfExists = 1;
             printf("\n");
             printf("---- DADOS DE: %s ----\n", pr.Name);
             printf("---- CPF:               %s \n", pr.Cpf);
@@ -565,11 +568,6 @@ void consultPerson()
             printf("\n\n");
         }
     };
-
-    if (cpfExists == 0)
-    {
-        printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_INFO_AGAIN);
-    }
 
     fclose(readFile);
 }
