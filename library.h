@@ -4,7 +4,6 @@
 #include <time.h>
 #include <ctype.h>
 
-
 // CREATE AND DEFINE VARIABLES VALUES
 #define LOCATIONS_LINES 5572
 #define N_CPF_DIGITS 11
@@ -38,24 +37,35 @@ int isCpfValid,
 
 // MESSAGES
 char RESET[] = {"\n------------- REINICIANDO O SISTEMA ------------"};
-char ERRORCPF[] = {"CPF invalido\n"};
-char ERROR_CPF_EXISTS[] = {"CPF ja cadastrado no sistema!\n"};
-char ERROR_CPF_NOT_EXISTS[] = {"CPF nao encontrado na base de dados\n"};
+char ASK_INFO_AGAIN[] = {"\nPor favor, digite novamente:\n\n"};
+char ASK_FOR_ANOTHER[] = {"\nDigite outro, se desejar:\n\n"};
+
+// ERROS - VALIDACAO CPF
+char ERROR_CPF_EXISTS[] = {"CPF ja cadastrado no sistema!"};
+char ERROR_CPF_NOT_EXISTS[] = {"CPF nao encontrado na base de dados"};
+char ERROR_CPF_INVALID[] = {"!CPF INVALIDO: Esse cpf nao e valido de acordo com as especificacoes da Receita Federal do Brasil."};
+char ERROR_CPF_FORMAT[] = {"!FORMATO ESPERADO INVALIDO: O CPF precisa ter 11 digitos, apenas numeros, escritos sem tracos ou pontos."};
+char ERROR_CPF_NOT_NUMBERS[] = {"!OPS, PARECE QUE VOCE DIGITOU ALGO DIFENTE DE NUMEROS: O CPF deve ser composto apenas de numeros, e deve ter 11 digitos escritos sem tracos ou pontos."};
+
+// ERROS - VALIDACAO DE OUTROS INPUTS
 char ERRORDATE[] = {"Data de nascimento invalida\n"};
 char ERRORFILE[] = {"Erro ao abrir a base de dados\n"};
-char ERRORSEX[] = {"O sexo digitado deve ser F ou M\n"};
+char ERRORSEX[] = {"\nO sexo digitado deve ser F ou M"};
 char ERROR_UF[] = {"UF inexistente\n"};
 char ERROR_CITY[] = {"CIDADE inexistente\n"};
+
+//??
 char SUCCESS_REGISTERED[] = {"Pessoa cadastrada com sucesso!\n"};
 char REMOVE_SUCCESS[] = {"PESSOA REMOVIDA COM SUCESSO!\n"};
 char REMOVE_ERROR[] = {"Erro ao excluir a pessoa! Por favor, tente novamente."};
 char ERROR_NOBODY_IN_CITY[] = {"Nenhum registro correspondente a cidade digitada!\n"};
-// OPTIONS INITIALIZATIONS
+char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistema?(S/N)\n"};
+
+// MENSAGENS DE INICIALIZACAO DE OPCOES
 char REPORT_INIT[] = {"------------------ APRESENTACAO RELATORIO ----------------\n"};
 char REMOVE_INIT[] = {"----------- REMOCAO DE REGISTRO ---------"};
 char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
-char CONFIRM_EXCLUDE[] = {"Tem certeza de que quer excluir essa pessoa do sistema?(S/N)\n"};
 
 // INIT CODE FUNCTION
 int executeMenu()
@@ -74,31 +84,33 @@ int executeMenu()
     return option;
 }
 
-// VALIDATIONS AND AUXILIAR FUNCTIONS
+// 2. VALIDACOES E FUNCOES AUXILIARES
+
+// 2.1 VALIDADOR DE CPF
 int validateCpf(char cpf[])
 {
     int i, d1, d2, r;
     int cpfDigits[N_CPF_DIGITS];
 
-    // Check if CPF has at least and at maximum 11 digits
-    if (strlen(cpf) != N_CPF_DIGITS)
+    // CONFERE SE CPF ...
+    if (strlen(cpf) == N_CPF_DIGITS) // TEM APENAS 11 DIGITOS?
     {
-        printf("O CPF precisa ter 11 digitos, sem tracos ou pontos.");
+        //SE SIM - É COMPOSTO APENAS DE NÚMEROS?
+        for (i = 0; i < 11; i++)
+        {
+            if (!isdigit(cpf[i]))
+            {
+                printf("%s", ERROR_CPF_NOT_NUMBERS);
+                return 0;
+            }
+            cpfDigits[i] = cpf[i] - '0';
+        }
+    }else{
+        printf("%s", ERROR_CPF_FORMAT);
         return 0;
     }
 
-    // Check if input has only NUMBERS 0-9
-    for (i = 0; i < 11; i++)
-    {
-        if (!isdigit(cpf[i]))
-        {
-            printf("O CPF deve ser composto apenas de números, sem tracos ou pontos.\n");
-            return 0;
-        }
-        cpfDigits[i] = cpf[i] - '0';
-    }
-
-    // Check if CPF inputed is composed of the SAME NUMBER. Eg: 000000000000
+    // É COMPOSTO DE APENAS DE UM MESMO NUMERO?. EX: 88888888888
     for (i = 1; i < 11; i++)
     {
         if (cpfDigits[i] != cpfDigits[0])
@@ -108,26 +120,29 @@ int validateCpf(char cpf[])
     }
     if (i == N_CPF_DIGITS)
     {
+        printf("%s", ERROR_CPF_INVALID);
         return 0;
     }
 
-    // Verify first CPF digit
+    // TEM SEU PRIMEIRO DIGITO VALIDO?
     d1 = 0;
-    for (i = 0; i < 9; i++)
-    {
+    for (i = 0; i < 9; i++){
         d1 += cpfDigits[i] * (10 - i);
     }
+
     r = 11 - (d1 % 11);
     if (r == 10 || r == 11)
     {
         r = 0;
     }
+
     if (r != cpfDigits[9])
     {
+        printf("%s", ERROR_CPF_INVALID);
         return 0;
     }
 
-    // Verify second CPF digit
+    // TEM SEU SEGUNDO DIGITO VALIDO?
     d2 = 0;
     for (i = 0; i < 10; i++)
     {
@@ -140,6 +155,7 @@ int validateCpf(char cpf[])
     }
     if (r != cpfDigits[10])
     {
+        printf("%s", ERROR_CPF_INVALID);
         return 0;
     }
 
@@ -354,7 +370,7 @@ void registerPerson()
 {
     Person pw = {0};
     int validCpf = 0, cpfExists = 0;
-    
+
     FILE *writeFile = fopen("person.txt", "a");
     isFileOpen(writeFile);
     fflush(stdin);
@@ -369,13 +385,15 @@ void registerPerson()
         isCpfValid = validateCpf(pw.Cpf);
         if (isCpfValid == 0)
         {
-            printf("\n%s", ERRORCPF);
+            printf("%s", ASK_INFO_AGAIN);
             continue;
-        }else{
+        }
+        else
+        {
             cpfExists = checkIfCpfIsRegistered(pw.Cpf);
             if (cpfExists == 1)
             {
-                printf("%s", ERROR_CPF_EXISTS);
+                printf("%s%s", ERROR_CPF_EXISTS, ASK_FOR_ANOTHER);
             }
         }
     } while (isCpfValid == 0 || checkIfCpfIsRegistered(pw.Cpf) == 1);
@@ -397,12 +415,12 @@ void registerPerson()
         tranformStringToUpper(pw.Sex);
         if (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0)
         {
-            printf("%s", ERRORSEX);
+            printf("%s%s", ERRORSEX, ASK_INFO_AGAIN);
         }
     } while (strcmp(pw.Sex, "F") != 0 && strcmp(pw.Sex, "M") != 0);
 
-   do
-   {
+    do
+    {
         printf("Dia Nascimento: ");
         scanf("%d", &pw.DayBorn);
 
@@ -416,8 +434,8 @@ void registerPerson()
         {
             printf("%s", ERRORDATE);
         }
-   } while (isDateValid != 1);
-   
+    } while (isDateValid != 1);
+
     do
     {
         fflush(stdin);
@@ -432,7 +450,7 @@ void registerPerson()
             printf("%s", ERROR_CITY);
         }
     } while (isInputValid != 1 || checkIfLocationExists(pw.City, 0) == 0);
-    
+
     do
     {
         printf("UF/Estado: ");
@@ -447,8 +465,6 @@ void registerPerson()
             printf("%s", ERROR_UF);
         }
     } while (isInputValid != 1 || checkIfLocationExists(pw.Uf, 1) == 0);
-    
-
 
     fflush(stdin);
 
@@ -466,6 +482,7 @@ void registerPerson()
     fprintf(writeFile, "%02d/%02d/%02d\n", pw.DayBorn, pw.MonthBorn, pw.yearBorn);
     fprintf(writeFile, "%s\n", pw.City);
     fprintf(writeFile, "%s\n", pw.Uf);
+    system("cls");
     printf("%s\n", SUCCESS_REGISTERED);
 
     // FILE - Close file
@@ -492,13 +509,15 @@ void consultPerson()
         isCpfValid = validateCpf(cpf);
         if (isCpfValid == 0)
         {
-            printf("\n%s", ERRORCPF);
+            printf("%s", ASK_INFO_AGAIN);
             continue;
-        }else{
+        }
+        else
+        {
             cpfExists = checkIfCpfIsRegistered(cpf);
-            if (cpfExists == 1)
+            if (cpfExists == 0)
             {
-                printf("%s", ERROR_CPF_EXISTS);
+                printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_INFO_AGAIN);
             }
         }
     } while (isCpfValid == 0 || checkIfCpfIsRegistered(cpf) != 1);
@@ -523,7 +542,7 @@ void consultPerson()
 
     if (cpfExists == 0)
     {
-        printf("%s", ERROR_CPF_NOT_EXISTS);
+        printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_INFO_AGAIN );
     }
 
     fclose(readFile);
@@ -542,7 +561,6 @@ void listPeopleByCity()
     FILE *readFile = fopen("person.txt", "r");
     isFileOpen(readFile);
 
-
     Locations city;
     // Receive input
     do
@@ -555,7 +573,7 @@ void listPeopleByCity()
         // Check if city Name exists
 
     } while (checkIfLocationExists(city.Name, 0) != 1);
-    
+
     // Search on person file. Compare each city line with Name, see the ones that are compatible and insert in a array;
     // Read each line on file
     while (fscanf(readFile,
@@ -578,7 +596,6 @@ void listPeopleByCity()
         }
     }
 
-    
     if (hasSomeoneInCity == 0)
     {
         printf("\n%s\n", ERROR_NOBODY_IN_CITY);
@@ -714,13 +731,15 @@ void removeRecord()
         isCpfValid = validateCpf(cpf);
         if (isCpfValid == 0)
         {
-            printf("\n%s", ERRORCPF);
+            printf("\n%s", ASK_INFO_AGAIN);
             continue;
-        }else{
+        }
+        else
+        {
             cpfExists = checkIfCpfIsRegistered(cpf);
             if (cpfExists != 1)
             {
-                printf("%s", ERROR_CPF_NOT_EXISTS);
+                printf("%s%s", ERROR_CPF_NOT_EXISTS, ASK_FOR_ANOTHER);
             }
         }
     } while (isCpfValid == 0 || cpfExists != 1);
@@ -742,7 +761,7 @@ void removeRecord()
         {
             // In case of equal, ask for confirmation to exclude
             do
-            {   	
+            {
                 printf("\n%s   |   %s\n", pRm.Cpf, pRm.Name);
                 printf("%s", CONFIRM_EXCLUDE);
                 fflush(stdin);
@@ -772,13 +791,17 @@ void removeRecord()
     if (removeResult != 0 || renameResult != 0)
     {
         printf("\n%s\n", REMOVE_ERROR);
-    }else{
+    }
+    else
+    {
         printf("\n%s\n", REMOVE_SUCCESS);
     }
 }
 
-
 // MENSAGEM PESSOA NAO EXISTENTE NO SISTEMA AO CONSULTAR
+// PEDIR DATA DO JEITO QUE ESTA SENDO PEDIDA?
+// PUXAR UF A PARTIR DA CIDADE
+// VALIDACOES DE NASCIMENTO
 // CONSULTA - CPF JA CADASTRADO NO SISTEMA? MENSAGEM ERRADA, TROCAR PARA - NAO MOSTRAR NADA | CPF ENCONTRADO NA BASE
 // MAIS COMENTARIOS E EM PORTUGES
 // REMOVER TODOS EXITS
