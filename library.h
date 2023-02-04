@@ -660,7 +660,7 @@ void consultPerson()
             printf("---- DADOS DE: %s ----\n", pr.Name);
             printf("---- CPF:               %s \n", pr.Cpf);
             printf("---- SEXO:              %s \n", pr.Sex);
-            printf("---- DT. NASCIMENTO:    %0.2d/%0.2d/%d \n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
+            printf("---- DT. NASCIMENTO:    %d/%d/%d \n", pr.DayBorn, pr.MonthBorn, pr.yearBorn);
             printf("---- CIDADE:            %s \n", pr.City);
             printf("---- ESTADO/UF          %s \n", pr.Uf);
             printf("\n\n");
