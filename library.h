@@ -314,6 +314,46 @@ int checkIfCpfIsRegistered(char cpf[])
     return 0;
 }
 
+int ufCorrespondsToCity(char cityName[], char uf[]){
+
+    int size = 0;
+    char locationLine[LOCATIONS_LINES];
+    char *ufToken;
+    char *cityTokenNoAccent;
+    static char Uf[3];
+
+    FILE *fp2 = fopen("locations.csv", "r");
+
+    // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
+    if (isFileOpen(fp2) == 1)
+    {
+        executeMenu();
+    }
+
+    size = 0;
+    // LER TODAS AS UFS DO ARQUIVO
+    while (fgets(locationLine, sizeof(locationLine), fp2))
+    {
+        // PEGA A UF E CIDADE DO ARQUIVO
+        ufToken = strtok(locationLine, ",");
+        ufToken = strtok(NULL, ","); // Recebe a segunda coluna do arquivo
+        cityTokenNoAccent = strtok(NULL, ","); 
+        cityTokenNoAccent = strtok(NULL, ","); 
+
+
+        // VERIFICA SE O NOME DAS CIDADES E UFs BATE
+        if (strcmp(cityName, cityTokenNoAccent) == 0 && strcmp(uf, ufToken) == 0)
+        {
+            fclose(fp2);
+            return 0;
+        }
+        size++;
+    }
+    // Close the file
+    fclose(fp2);
+    return 1;
+}
+
 int checkIfLocationExists(char userInput[], int locationType)
 {
     int size = 0;
@@ -332,7 +372,7 @@ int checkIfLocationExists(char userInput[], int locationType)
     if (locationType == 1)
     {
         size = 0;
-        // VERRIFY UF
+        // VERIFICA A UF
         while (fgets(locationLine, sizeof(locationLine), fp2))
         {
             ufToken = strtok(locationLine, ",");
@@ -349,7 +389,7 @@ int checkIfLocationExists(char userInput[], int locationType)
 
     if (locationType == 0)
     {
-        // VERIFY CITY
+        // VERIFICA A CIDADE
         while (fgets(locationLine, sizeof(locationLine), fp2))
         {
             cityTokenNoAccent = strtok(locationLine, ",");
@@ -422,6 +462,7 @@ void registerPerson()
 {
     Person pw = {0};
     int validCpf = 0, cpfExists = 0;
+    int ufCorresponds = 0;
 
     // ABRE O ARQUIVO
     FILE *writeFile = fopen("person.txt", "a");
@@ -438,7 +479,7 @@ void registerPerson()
     printf("-------------------- REGISTRO DE PESSOA --------------------\n");
     do
     {
-        printf("CPF: ");
+        printf("CPF(Ex: 04285172186): ");
         fgets(pw.Cpf, 15, stdin);
         pw.Cpf[strcspn(pw.Cpf, "\n")] = '\0'; // Remove \n e troca por um caracter nulo
         isCpfValid = validateCpf(pw.Cpf);
@@ -468,7 +509,7 @@ void registerPerson()
 
     do
     {
-        printf("Sexo (F - Feminino, M - Masculino): ");
+        printf("Sexo ('F' para Feminino OU 'M' para Masculino): ");
         fflush(stdin);
         scanf("%s", pw.Sex);
         tranformStringToUpper(pw.Sex);
@@ -512,11 +553,17 @@ void registerPerson()
     do
     {
         printf("UF/Estado: ");
-        // Verify if USER UF has only 2 digits
+        // VERIFICA SE A UF DIGITADA TEM APENAS 2 DIGITOS
         fflush(stdin);
         scanf("%s", pw.Uf);
         tranformStringToUpper(pw.Uf);
         isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf) - 1);
+
+        // CONFERE SE UF CORRESPONDE A CIDADE DIGITADA
+        ufCorresponds = ufCorrespondsToCity(pw.City, pw.Uf);
+        if(ufCorresponds != 0){
+            printf("%s%s", "A UF/Estado nao corresponde a cidade digitada!", ASK_INFO_AGAIN);
+        }
 
         if (isInputValid == 0)
         {
@@ -525,7 +572,7 @@ void registerPerson()
                 printf("%s", ERROR_UF);
             }
         }
-    } while (isInputValid != 0 || checkIfLocationExists(pw.Uf, 1) == 0);
+    } while (isInputValid != 0 || checkIfLocationExists(pw.Uf, 1) == 0 || ufCorresponds != 0);
 
     fflush(stdin);
 
@@ -537,7 +584,7 @@ void registerPerson()
     fprintf(writeFile, "%s\n", pw.City);
     fprintf(writeFile, "%s\n", pw.Uf);
     system("cls");
-    printf("%s\n", SUCCESS_REGISTERED);
+    printf("\n\n%s\n", SUCCESS_REGISTERED);
 
     // FECHA O ARQUIVO
     fclose(writeFile);
@@ -569,7 +616,7 @@ void consultPerson()
     // PEDE O CPF E FAZ SUA VALIDACAO
     do
     {
-        printf("Digite o CPF para consulta: ");
+        printf("Digite o CPF para consulta: (Ex: 04285172186)");
         fflush(stdin);
         fgets(cpf, 12, stdin);
         cpf[strcspn(cpf, "\n")] = '\0';
@@ -928,5 +975,6 @@ void removeRecord()
     }
 }
 
+// NUMERO DE CARACTERES INCORRETOS PARA O CAMPO, SE POE ESPACO, MANDA ISSO
 // PUXAR UF A PARTIR DA CIDADE
 // MAIS COMENTARIOS E EM PORTUGES
