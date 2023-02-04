@@ -46,6 +46,7 @@ char ERROR_CPF_NOT_EXISTS[] = {"CPF nao encontrado na base de dados"};
 char ERROR_CPF_INVALID[] = {"!CPF INVALIDO: Esse cpf nao e valido de acordo com as especificacoes da Receita Federal do Brasil."};
 char ERROR_CPF_FORMAT[] = {"!FORMATO ESPERADO INVALIDO: O CPF precisa ter 11 digitos, apenas numeros, escritos sem tracos ou pontos."};
 char ERROR_CPF_NOT_NUMBERS[] = {"!OPS, PARECE QUE VOCE DIGITOU ALGO DIFENTE DE NUMEROS: O CPF deve ser composto apenas de numeros, e deve ter 11 digitos escritos sem tracos ou pontos."};
+char NO_RECORDS[] = {"\nAinda nao ha nenhum beneficiado registrado na base de dados!\n"};
 
 // ERROS - VALIDACAO DE OUTROS INPUTS
 char ERROR_INPUT_NOT_STRING[] = {"Voce deve digitar apenas letras, SEM simbolos ou acentos para esse campo!"};
@@ -179,6 +180,26 @@ int isFileOpen(FILE *file)
     }
     return 0;
 }
+
+int checkIfFileHasRecords(FILE *file)
+{
+    // Move o ponteiro de posicao para o início do arquivo
+    fseek(file, 0, SEEK_SET);
+    int regCount = 0;
+    // Define uma variável para armazenar cada linha lida do arquivo
+    char line[5000];
+
+    // Enquanto houver linhas a serem lidas
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        // Incrementa a quantidade de registros lidos
+        regCount++;
+    }
+    // Move o ponteiro de posicao para o início do arquivo novamente
+    fseek(file, 0, SEEK_SET);
+    return regCount;
+}
+
 
 int checkIfDateValid(int d, int m, int y)
 {
@@ -494,7 +515,7 @@ void registerPerson()
         fflush(stdin);
         scanf("%s", pw.Uf);
         tranformStringToUpper(pw.Uf);
-        isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf)-1);
+        isInputValid = checkIfInputIsValid(pw.Uf, sizeof(pw.Uf) - 1);
 
         if (isInputValid == 0)
         {
@@ -533,6 +554,14 @@ void consultPerson()
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
     if (isFileOpen(readFile) == 1)
     {
+        return;
+    }
+
+    // CONFERE SE O ARQUIVO POSSUI DADOS
+    if (checkIfFileHasRecords(readFile) == 0)
+    {
+        printf("%s", NO_RECORDS);
+        fclose(readFile);
         return;
     }
 
@@ -597,6 +626,14 @@ void listPeopleByCity()
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
     if (isFileOpen(readFile) == 1)
     {
+        return;
+    }
+
+    // CONFERE SE O ARQUIVO POSSUI DADOS
+    if (checkIfFileHasRecords(readFile) == 0)
+    {
+        printf("%s", NO_RECORDS);
+        fclose(readFile);
         return;
     }
 
@@ -678,10 +715,20 @@ void generateReport()
     float pM = 0, pF = 0;
     Person personData;
 
+    printf("%s", REPORT_INIT);
+
     FILE *readFile = fopen("person.txt", "r");
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
     if (isFileOpen(readFile) == 1)
     {
+        return;
+    }
+
+    // CONFERE SE O ARQUIVO POSSUI DADOS
+    if (checkIfFileHasRecords(readFile) == 0)
+    {
+        printf("%s", NO_RECORDS);
+        fclose(readFile);
         return;
     }
 
@@ -738,7 +785,6 @@ void generateReport()
         registeredPeople++;
     }
 
-    printf("%s\n", REPORT_INIT);
     printf("TOTAL PESSOAS BENEFICIADAS: %d\n\n", registeredPeople);
 
     // CALCULA A PORCENTAGEM POR FAIZA ETARIA
@@ -782,6 +828,16 @@ void removeRecord()
     // CHECAR SE O ARQUIVO ABRIU, SE NAO - VOLTA AO MENU
     if (isFileOpen(primaryFile) == 1 || isFileOpen(tempFile) == 1)
     {
+        return;
+    }
+
+    // CONFERE SE O ARQUIVO POSSUI DADOS
+    if (checkIfFileHasRecords(primaryFile) == 0)
+    {
+        printf("%s", NO_RECORDS);
+        fclose(primaryFile);
+        fclose(tempFile);
+        remove("personTemp.txt");
         return;
     }
 
@@ -870,7 +926,6 @@ void removeRecord()
         printf("\n%s\n", REMOVE_SUCCESS);
     }
 }
-
 
 // NENHUMA PESSOA CADASTRADA PARA EXECUTAR AS OUTRAS FUNCOES - ERRO
 // MENSAGEM PESSOA NAO EXISTENTE NO SISTEMA AO CONSULTAR
