@@ -69,15 +69,15 @@ char MENU[] = {"-------------- MENU DE OPCOES -------------\n"};
 char PERCENT_BY_AGE[] = {"***** PORCENTAGEM POR IDADE\n"};
 char PERCENT_BY_SEX[] = {"***** PORCENTAGEM POR SEXO\n"};
 
-
 // FUNCAO DE LIMPAR TELA
-    void clearScreen() {
-        #ifdef _WIN32
-        system("cls");
-        #else
-        system("clear");
-        #endif
-    }
+void clearScreen()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
 
 // 1. FUNCAO INICIAL DO CODIGO
 int executeMenu()
@@ -202,7 +202,7 @@ int checkIfFileHasRecords(FILE *file)
         // INCREMENTA A QUANTIDADE DE REGISTROS
         regCount++;
     }
-    //MOVE O PONTEIRO DE POSICAO PARA O INICIO DO ARQUIVO DE NOVO
+    // MOVE O PONTEIRO DE POSICAO PARA O INICIO DO ARQUIVO DE NOVO
     fseek(file, 0, SEEK_SET);
     return regCount;
 }
@@ -213,7 +213,8 @@ int checkIfDateValid(int d, int m, int y)
     int monthMaxDays = MAX_DAYS_IN_MONTH;
 
     // CONFERE SE O ANO INPUTADO TEM 4 DIGITOS
-    if (y < 1000 || y > 9999) {
+    if (y < 1000 || y > 9999)
+    {
         printf("O ano precisa ser digitado com 4 digitos!\n");
         return 0;
     }
@@ -268,7 +269,7 @@ int checkIfInputIsValid(char input[], int maxChar)
     // CONFERE SE O LIMITE MAXIMO DE CARACTERES NAO É EXCEDIDO
     if (inputLen > maxChar || (inputLen == 0))
     {
-        printf("%s%s", ERROR_INPUT_LIMIT, ASK_INFO_AGAIN);
+        printf("%s", ERROR_INPUT_LIMIT);
         return 1;
     }
 
@@ -320,7 +321,8 @@ int checkIfCpfIsRegistered(char cpf[])
     return 0;
 }
 
-int ufCorrespondsToCity(char cityName[], char uf[]){
+int ufCorrespondsToCity(char cityName[], char uf[])
+{
 
     int size = 0;
     char locationLine[LOCATIONS_LINES];
@@ -342,10 +344,9 @@ int ufCorrespondsToCity(char cityName[], char uf[]){
     {
         // PEGA A UF E CIDADE DO ARQUIVO
         ufToken = strtok(locationLine, ","); // Ignora a primeira coluna do arquivo
-        ufToken = strtok(NULL, ","); // Recebe a segunda coluna do arquivo
-        cityTokenNoAccent = strtok(NULL, ","); 
-        cityTokenNoAccent = strtok(NULL, ","); 
-
+        ufToken = strtok(NULL, ",");         // Recebe a segunda coluna do arquivo
+        cityTokenNoAccent = strtok(NULL, ",");
+        cityTokenNoAccent = strtok(NULL, ",");
 
         // VERIFICA SE O NOME DAS CIDADES E UFs BATE
         if (strcmp(cityName, cityTokenNoAccent) == 0 && strcmp(uf, ufToken) == 0)
@@ -400,9 +401,9 @@ int checkIfLocationExists(char userInput[], int locationType)
         while (fgets(locationLine, sizeof(locationLine), fp2))
         {
             cityTokenNoAccent = strtok(locationLine, ",");
-            cityTokenNoAccent = strtok(NULL, ","); 
-            cityTokenNoAccent = strtok(NULL, ","); 
-            cityTokenNoAccent = strtok(NULL, ","); 
+            cityTokenNoAccent = strtok(NULL, ",");
+            cityTokenNoAccent = strtok(NULL, ",");
+            cityTokenNoAccent = strtok(NULL, ",");
 
             // VERIFICA SE TOKEN == INPUT - SE SIM, CIDADE EXISTE
             if (strcmp(userInput, cityTokenNoAccent) == 0)
@@ -571,7 +572,8 @@ void registerPerson()
 
         // CONFERE SE UF CORRESPONDE A CIDADE DIGITADA
         ufCorresponds = ufCorrespondsToCity(pw.City, pw.Uf);
-        if(ufCorresponds != 0){
+        if (ufCorresponds != 0)
+        {
             printf("%s%s", "A UF/Estado nao corresponde a cidade digitada!", ASK_INFO_AGAIN);
         }
 
@@ -675,6 +677,7 @@ void listPeopleByCity()
     int j = 0;
     int numberOfPeople = 0;
     int hasSomeoneInCity = 0;
+    int ufCorresponds = 0;
     Person personByCityStruct;
     Person listOfPeople[200];
 
@@ -697,7 +700,7 @@ void listPeopleByCity()
 
     Locations city;
 
-    // PEDE NOME DA CIDADE E VERIFICA SE ELA EXISTE ATE QUE SEJA DIGITADA UMA CIDADE EXISTENTE
+    // PEDE NOME DA CIDADE e UF E VERIFICA SE ELA EXISTE ATE QUE SEJA DIGITADA UMA CIDADE EXISTENTE
     do
     {
         fflush(stdin);
@@ -717,6 +720,31 @@ void listPeopleByCity()
 
     } while (isInputValid != 0 || checkIfLocationExists(city.Name, 0) == 0);
 
+    do
+    {
+        printf("UF/Estado: ");
+        // VERIFICA SE A UF DIGITADA TEM APENAS 2 DIGITOS
+        fflush(stdin);
+        scanf("%s", city.Uf);
+        tranformStringToUpper(city.Uf);
+        isInputValid = checkIfInputIsValid(city.Uf, sizeof(city.Uf) - 1);
+
+        // CONFERE SE UF CORRESPONDE A CIDADE DIGITADA
+        ufCorresponds = ufCorrespondsToCity(city.Name, city.Uf);
+        if (ufCorresponds != 0)
+        {
+            printf("%s%s", "A UF/Estado nao corresponde a cidade digitada!", ASK_INFO_AGAIN);
+        }
+
+        if (isInputValid == 0)
+        {
+            if (checkIfLocationExists(city.Uf, 1) == 0)
+            {
+                printf("%s", ERROR_UF);
+            }
+        }
+    } while (isInputValid != 0 || checkIfLocationExists(city.Uf, 1) == 0 || ufCorresponds != 0);
+
     printf("\n-------------- LISTA DE PESSOAS EM %s -------------", city.Name);
 
     // FAZ A LEITURA DOS DADOS NA BASE
@@ -734,7 +762,7 @@ void listPeopleByCity()
     {
 
         // SE O NOME DA CIDADE É IGUAL, A PESSOA CORRESPONDENTE É SALVA NO ARRAY DE STRUCTS - personByCityStruct
-        if (strcmp(city.Name, personByCityStruct.City) == 0)
+        if (strcmp(city.Name, personByCityStruct.City) == 0 && strcmp(city.Uf, personByCityStruct.Uf) == 0)
         {
             hasSomeoneInCity = 1;
             listOfPeople[numberOfPeople] = personByCityStruct;
