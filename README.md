@@ -8,7 +8,7 @@
 </h4> 
 <br>
 <h4 align="center">
- 🔃Project status: In progress ... and I'd love your ideas to improve it
+ ♻️Project status: Done, but I'd love your ideas to improve it
 </h4> 
 
 <h3 id="the-problem">🪶 Description</h3>
@@ -23,10 +23,12 @@
 
 <h3 id="features">✨ Features</h3>
 
-- [x] Registration of a person
+- [x] Registration if data in a file
 - [x] Consultation by CPF
 - [x] Consultation according to city
 - [x] Some validations of data like CPF, date, existing city/state or not
+- [x] Exclusion of data from file
+- [x] Presentation of a report about people registered in the system
 
 <br>
 <p>🤔 Any doubts or ideas? Feel free to get in touch with me: </p> - <a target="_blank" href="https://www.linkedin.com/in/suyanne-miranda/"> Linkedin </a> <p target="_blank"> - suyannesaramiranda@gmail.com </p> 
