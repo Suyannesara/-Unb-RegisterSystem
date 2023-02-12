@@ -459,7 +459,7 @@ int calcAge(int yearBorn, int monthBorn, int dayBorn)
     }
     // Se o mes de nascimento nao tiver chegado ainda, ou for esse mes  E
     // Se o dia de nascimento nao tiver chegado ainda, é retirado 1 ano da idade
-    else if (monthBorn <= date.tm_mon + 1 && dayBorn > date.tm_mday)
+    if (monthBorn <= date.tm_mon + 1 && dayBorn > date.tm_mday)
     {
         age--;
     }
