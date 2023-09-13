@@ -24,8 +24,8 @@
 <h3 id="features">✨ Features</h3>
 
 - [x] Registration if data in a file
-- [x] Consultation by CPF
-- [x] Consultation according to city
+- [x] Search by CPF
+- [x] Search according to city
 - [x] Some validations of data like CPF, date, existing city/state or not
 - [x] Exclusion of data from file
 - [x] Presentation of a report about people registered in the system
